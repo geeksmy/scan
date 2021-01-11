@@ -1,0 +1,17 @@
+debug: true
+logger:
+  level: debug
+redis:
+  uri: redis://:password@redis:6379/0
+  sentinel: false
+  password: password
+  master_name: master
+  sentinel_addrs:
+    - redis:6379
+  db: 0
+Database:
+  DSN: "postgres://postgres:postgres@localhost/test"
+  LogMode: false
+  MaxIdleConns: 0
+  MaxOpenConns: 0
+  ConnMaxLifetime: 0

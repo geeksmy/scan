@@ -1,0 +1,9 @@
+# 调试模式：生产环境请关闭此项
+debug: true
+logger:
+  level: debug
+redis:
+  uri: redis://:YcoVgdNCq5@192.168.64.13:30099/0
+database:
+  dsn: root:sYY4ikyLf9@(192.168.64.13:31192)/scan?charset=utf8mb4&parseTime=True&loc=Local
+  log_mode: true

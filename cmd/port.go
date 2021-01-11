@@ -13,16 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package cmd
 
 import (
-	"log"
+	"scan/config"
 
-	"scan/cmd"
+	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		log.Fatalln(err)
+// portCmd represents the port command
+func portCmd() *cobra.Command {
+	portCmd := &cobra.Command{
+		Use:   "dns",
+		Short: "端口扫描",
+		Long:  "端口扫描器",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			zap.L().Info("待实现.....")
+			return nil
+		},
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			config.Init(cmd.Flags().Lookup("config").Value.String())
+			return nil
+		},
 	}
+
+	return portCmd
 }

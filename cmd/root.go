@@ -45,9 +45,13 @@ ____________________________________________________________
 
 func init() {
 	// 全局配置
-	RootCmd.PersistentFlags().StringP("config", "c", "", "配置文件路径")
 	RootCmd.PersistentFlags().StringP("url", "u", "", "需要扫描的ip或url")
+	RootCmd.PersistentFlags().StringP("config", "c", "", "配置文件路径")
 
 	// 新增命令
 	RootCmd.AddCommand(versionCmd())
+	RootCmd.AddCommand(poolCmd())
+	RootCmd.AddCommand(dirCmd())
+	RootCmd.AddCommand(dnsCmd())
+	RootCmd.AddCommand(portCmd())
 }
