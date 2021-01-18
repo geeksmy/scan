@@ -17,8 +17,8 @@ package cmd
 
 import (
 	"scan/config"
-	"scan/pkg/libc/redis"
 
+	"github.com/geeksmy/go-lib/redis"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )

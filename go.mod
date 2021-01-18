@@ -6,6 +6,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/c2h5oh/hide v0.0.0-20181204203522-190260264be9
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/geeksmy/go-lib v0.0.0-20210118061057-f07c08b1aa47
 	github.com/go-redis/redis/v7 v7.4.0
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/uuid v1.1.4
@@ -24,7 +25,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
-	go.uber.org/zap v1.10.0
+	go.uber.org/zap v1.12.0
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
 	golang.org/x/sys v0.0.0-20210105210732-16f7687f5001 // indirect
 	golang.org/x/text v0.3.4 // indirect

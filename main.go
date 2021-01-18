@@ -16,13 +16,9 @@ limitations under the License.
 package main
 
 import (
-	"log"
-
 	"scan/cmd"
 )
 
 func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		log.Fatalln(err)
-	}
+	cmd.Execute()
 }

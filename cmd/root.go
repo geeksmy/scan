@@ -16,13 +16,17 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
 
 	"github.com/spf13/cobra"
 )
 
-var RootCmd = cobra.Command{
-	Use: "scan",
+var rootCmd = &cobra.Command{
+	Use:          "scan",
+	SilenceUsage: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		banner()
 		_ = cmd.Help()
@@ -43,15 +47,47 @@ ____________________________________________________________
 ` + "\n")
 }
 
+// Execute is the main cobra method
+func Execute() {
+	var cancel context.CancelFunc
+	mainContext, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+	defer func() {
+		signal.Stop(signalChan)
+		cancel()
+	}()
+	go func() {
+		select {
+		case <-signalChan:
+			// caught CTRL+C
+			fmt.Println("\n[!] Keyboard interrupt detected, terminating.")
+			cancel()
+		case <-mainContext.Done():
+		}
+	}()
+
+	if err := rootCmd.Execute(); err != nil {
+		// Leaving this in results in the same error appearing twice
+		// Once before and once after the help output. Not sure if
+		// this is going to be needed to output other errors that
+		// aren't automatically outputted.
+		// fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
 func init() {
 	// 全局配置
-	RootCmd.PersistentFlags().StringP("url", "u", "", "需要扫描的ip或url")
-	RootCmd.PersistentFlags().StringP("config", "c", "", "配置文件路径")
+	rootCmd.PersistentFlags().StringP("url", "u", "", "需要扫描的ip或url")
+	rootCmd.PersistentFlags().StringP("config", "c", "", "配置文件路径")
 
 	// 新增命令
-	RootCmd.AddCommand(versionCmd())
-	RootCmd.AddCommand(poolCmd())
-	RootCmd.AddCommand(dirCmd())
-	RootCmd.AddCommand(dnsCmd())
-	RootCmd.AddCommand(portCmd())
+	rootCmd.AddCommand(versionCmd())
+	rootCmd.AddCommand(poolCmd())
+	rootCmd.AddCommand(dirCmd())
+	rootCmd.AddCommand(dnsCmd())
+	rootCmd.AddCommand(portCmd())
 }

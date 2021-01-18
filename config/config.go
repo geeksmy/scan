@@ -3,8 +3,7 @@ package config
 import (
 	"os"
 
-	"scan/pkg/libc/redis"
-
+	"github.com/geeksmy/go-lib/redis"
 	"github.com/jinzhu/configor"
 	"go.uber.org/zap"
 )
