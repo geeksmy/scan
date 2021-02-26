@@ -13,6 +13,7 @@ type Config struct {
 	Logger   LoggerConfig   `yaml:"logger,omitempty"`
 	Redis    redis.Conf     `yaml:"redis,omitempty"`
 	Database DatabaseConfig `yaml:"database,omitempty"`
+	Port     PortConfig     `yaml:"port,omitempty"`
 }
 
 type DatabaseConfig struct {
@@ -31,6 +32,16 @@ type LoggerConfig struct {
 	Format string `yaml:"format,omitempty" default:"json"`
 	// file
 	Output string `yaml:"output,omitempty" default:""`
+}
+
+type PortConfig struct {
+	Protocol        string   `yaml:"protocol,omitempty" default:"tcp"`
+	FingerprintFile string   `yaml:"fingerprint_file,omitempty" default:"tcp"`
+	TargetIPs       []string `yaml:"target_ips,omitempty"`
+	TargetPorts     []string `yaml:"target_ports,omitempty"`
+	Timeout         int      `yaml:"timeout,omitempty"`
+	Thread          int      `yaml:"thread,omitempty"`
+	Retry           int      `yaml:"retry,omitempty"`
 }
 
 func InitLogger(debug bool, level, output string) {
@@ -88,7 +99,7 @@ func Init(cfgFile string) {
 	InitLogger(C.Debug, C.Logger.Level, C.Logger.Output)
 	InitRedis(C.Redis)
 
-	zap.L().Debug("[+]: 加载配置文件")
+	zap.L().Debug("[+]: 加载配置文件 ->", zap.String("文件名", cfgFile))
 }
 
 func init() {

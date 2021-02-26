@@ -7,3 +7,23 @@ redis:
 database:
   dsn: root:sYY4ikyLf9@(192.168.64.13:31192)/scan?charset=utf8mb4&parseTime=True&loc=Local
   log_mode: true
+
+port:
+  protocol: "tcp"
+  fingerprint_file: "config/fingerprint/nmap-service-probes"
+  target_ips:
+    - "192.168.64.13"
+#    - "192.168.0.0/24"
+  target_ports:
+    - "1443"
+    - "22"
+    - "445"
+    - "8161"
+    - "3306"
+    - "135"
+    - "5980"
+    - "80-90"
+    - "8080-8090"
+  timeout: 5
+  thread: 20
+  retry: 3

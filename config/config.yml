@@ -15,3 +15,22 @@ Database:
   MaxIdleConns: 0
   MaxOpenConns: 0
   ConnMaxLifetime: 0
+
+port:
+  protocol: "tcp"
+  fingerprint_file: "fingerprint/nmap-service-probes"
+  target_ips:
+    - "192.168.1.100"
+  target_ports:
+    - "1443"
+    - "22"
+    - "445"
+    - "8161"
+    - "3306"
+    - "135"
+    - "5980"
+    - "80-90"
+    - "8080-8090"
+  timeout: 5
+  thread: 20
+  retry: 3

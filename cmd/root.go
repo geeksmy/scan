@@ -24,6 +24,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	cfgFile string
+)
+
 var rootCmd = &cobra.Command{
 	Use:          "scan",
 	SilenceUsage: true,
@@ -63,7 +67,7 @@ func Execute() {
 		select {
 		case <-signalChan:
 			// caught CTRL+C
-			fmt.Println("\n[!] Keyboard interrupt detected, terminating.")
+			fmt.Println("\n[!] 检测到键盘中断，正在终止。")
 			cancel()
 		case <-mainContext.Done():
 		}
@@ -81,13 +85,13 @@ func Execute() {
 
 func init() {
 	// 全局配置
-	rootCmd.PersistentFlags().StringP("url", "u", "", "需要扫描的ip或url")
-	rootCmd.PersistentFlags().StringP("config", "c", "", "配置文件路径")
+	// rootCmd.PersistentFlags().StringP("url", "u", "", "需要扫描的ip或url")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "配置文件路径")
 
 	// 新增命令
-	rootCmd.AddCommand(versionCmd())
-	rootCmd.AddCommand(poolCmd())
-	rootCmd.AddCommand(dirCmd())
-	rootCmd.AddCommand(dnsCmd())
 	rootCmd.AddCommand(portCmd())
+	rootCmd.AddCommand(versionCmd())
+	// rootCmd.AddCommand(poolCmd())
+	// rootCmd.AddCommand(dirCmd())
+	// rootCmd.AddCommand(dnsCmd())
 }

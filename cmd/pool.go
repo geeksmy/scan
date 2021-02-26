@@ -34,7 +34,7 @@ func poolCmd() *cobra.Command {
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			config.Init(cmd.Flags().Lookup("config").Value.String())
+			config.Init(cfgFile)
 			if err := redis.Connect(); err != nil {
 				return err
 			}

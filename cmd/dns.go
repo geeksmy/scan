@@ -17,7 +17,7 @@ package cmd
 
 import (
 	"scan/config"
-	"scan/dao"
+	"scan/internal/dao"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -34,7 +34,7 @@ func dnsCmd() *cobra.Command {
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			config.Init(cmd.Flags().Lookup("config").Value.String())
+			config.Init(cfgFile)
 			switch cmd.Flags().Lookup("mode").Value.String() {
 			case "db":
 				dao.InitDB(config.C)

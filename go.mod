@@ -3,11 +3,14 @@ module scan
 go 1.15
 
 require (
+	github.com/3th1nk/cidr v0.0.0-20200222033026-ac57bd3ad921
 	github.com/DATA-DOG/go-sqlmock v1.5.0
+	github.com/Ullaakut/nmap v2.0.2+incompatible // indirect
 	github.com/c2h5oh/hide v0.0.0-20181204203522-190260264be9
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/geeksmy/go-lib v0.0.0-20210118061057-f07c08b1aa47
 	github.com/go-redis/redis/v7 v7.4.0
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/uuid v1.1.4
 	github.com/jinzhu/configor v1.2.1
@@ -26,7 +29,7 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/zap v1.12.0
-	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
+	golang.org/x/net v0.0.0-20210224082022-3d97a244fca7 // indirect
 	golang.org/x/sys v0.0.0-20210105210732-16f7687f5001 // indirect
 	golang.org/x/text v0.3.4 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
