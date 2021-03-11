@@ -2,6 +2,7 @@ package serialization
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -119,7 +120,7 @@ func String2Match(s, name string) (*model.Match, error) {
 	}
 
 	textSplinted := strings.Split(directive.DirectiveStr, directive.Delimiter)
-	pattern, versionInfo := textSplinted[0], strings.Join(textSplinted[1:], "")
+	pattern, info := textSplinted[0], strings.Join(textSplinted[1:], "")
 
 	patternUnescaped, _ := tools.DecodePattern(pattern)
 	patternUnescapedStr := string([]rune(string(patternUnescaped)))
@@ -129,9 +130,22 @@ func String2Match(s, name string) (*model.Match, error) {
 		return nil, errors.New("解析正则表达式失败")
 	}
 
+	infos := strings.Split(info, " ")
+	var (
+		infoS, infoV string
+	)
+	for i := 0; i < len(infos); i++ {
+		if strings.HasPrefix(infos[i], "p/") {
+			infoS = infos[i][2 : len(infos[i])-1]
+		}
+		if strings.HasPrefix(infos[i], "v/") {
+			infoV = infos[i][2 : len(infos[i])-1]
+		}
+	}
+
 	res.Service = directive.DirectiveName
 	res.Pattern = pattern
-	res.VersionInfo = versionInfo
+	res.VersionInfo = fmt.Sprintf("%s %s", infoS, infoV)
 	res.PatternCompiled = patternCompiled
 
 	return &res, nil

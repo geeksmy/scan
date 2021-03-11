@@ -1,9 +1,11 @@
 package tools
 
 import (
+	"math/rand"
 	"net"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/3th1nk/cidr"
 )
@@ -64,4 +66,29 @@ func UnfoldPort(targetPorts []string) (*[]string, error) {
 		}
 	}
 	return &res, nil
+}
+
+func Shuffle(slice []string) {
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	for len(slice) > 0 {
+		n := len(slice)
+		randIndex := r.Intn(n)
+		slice[n-1], slice[randIndex] = slice[randIndex], slice[n-1]
+		slice = slice[:n-1]
+	}
+}
+
+// 判断是否包含端口
+func IncludePort(targetPort string, ports string) bool {
+	nPorts := strings.Split(ports, ",")
+	nmapPorts, err := UnfoldPort(nPorts)
+	if err != nil {
+		return false
+	}
+	for _, port := range *nmapPorts {
+		if targetPort == port {
+			return true
+		}
+	}
+	return false
 }

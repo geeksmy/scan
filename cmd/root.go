@@ -21,6 +21,8 @@ import (
 	"os"
 	"os/signal"
 
+	"scan/pkg/tools"
+
 	"github.com/spf13/cobra"
 )
 
@@ -32,23 +34,9 @@ var rootCmd = &cobra.Command{
 	Use:          "scan",
 	SilenceUsage: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		banner()
+		tools.Banner()
 		_ = cmd.Help()
 	},
-}
-
-func banner() {
-	fmt.Printf(`
-____________________________________________________________        
- ____________________________________________________________       
-  ____________________________________________________________      
-   __/\\\\\\\\\\______/\\\\\\\\___/\\\\\\\\\______/\\/\\\\\\___     
-    _\/\\\//////_____/\\\//////___\////////\\\____\/\\\////\\\__    
-     _\/\\\\\\\\\\___/\\\____________/\\\\\\\\\\___\/\\\__\//\\\_   
-      _\////////\\\__\//\\\__________/\\\/////\\\___\/\\\___\/\\\_  
-       __/\\\\\\\\\\___\///\\\\\\\\__\//\\\\\\\\/\\__\/\\\___\/\\\_ 
-        _\//////////______\////////____\////////\//___\///____\///__
-` + "\n")
 }
 
 // Execute is the main cobra method
@@ -90,6 +78,7 @@ func init() {
 
 	// 新增命令
 	rootCmd.AddCommand(portCmd())
+	rootCmd.AddCommand(blastingCmd())
 	rootCmd.AddCommand(versionCmd())
 	// rootCmd.AddCommand(poolCmd())
 	// rootCmd.AddCommand(dirCmd())

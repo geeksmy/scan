@@ -15,10 +15,12 @@ func (Port) TableName() string {
 
 type PortService struct {
 	BaseUUIDModel
-	PortID string `gorm:"primary_key;type:varchar(36);"`
-	Port   string `gorm:"type:varchar(5);"`
-	Type   string `gorm:"type:varchar(32);"`
-	Banner string `gorm:"type:varchar(128);"`
+	PortID     string `gorm:"primary_key;type:varchar(36);"`
+	Port       string `gorm:"type:varchar(5);"`
+	ServerType string `gorm:"type:varchar(128);"`
+	State      string `gorm:"type:varchar(128);"`
+	Version    string `gorm:"type:varchar(128);"`
+	Banner     string `gorm:"type:varchar(128);"`
 }
 
 func (PortService) TableName() string {

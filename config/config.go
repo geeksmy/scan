@@ -35,8 +35,8 @@ type LoggerConfig struct {
 }
 
 type PortConfig struct {
-	Protocol        string   `yaml:"protocol,omitempty" default:"tcp"`
-	FingerprintFile string   `yaml:"fingerprint_file,omitempty" default:"tcp"`
+	Protocol        string   `yaml:"protocol,omitempty"`
+	FingerprintFile string   `yaml:"fingerprint_file,omitempty"`
 	TargetIPs       []string `yaml:"target_ips,omitempty"`
 	TargetPorts     []string `yaml:"target_ports,omitempty"`
 	Timeout         int      `yaml:"timeout,omitempty"`

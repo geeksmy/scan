@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"strings"
 
-	config2 "scan/config"
 	"scan/internal/model"
 	"scan/internal/serialization"
 
@@ -31,11 +30,8 @@ func (p *Parse) ParsingNmapFingerprint(nmapFingerprintFile string) (*[]model.Pro
 	// 读取 nmap-service-probes 或自定义的规则文件
 	fingerprintData, err := ioutil.ReadFile(nmapFingerprintFile)
 	if err != nil {
-		if config2.C.Debug != true {
-			p.logger.Error("读取规则文件失败", zap.Error(err))
-		} else {
-			p.logger.Error("读取规则文件失败")
-		}
+		p.logger.Error("[-] ParsingNmapFingerprint -> 读取规则文件失败")
+		return nil, err
 	}
 
 	// 解析规则文本获取Probe列表
@@ -43,7 +39,7 @@ func (p *Parse) ParsingNmapFingerprint(nmapFingerprintFile string) (*[]model.Pro
 	if err := p.parseFingerprint2ProbesList(fingerprintData); err != nil {
 		return nil, err
 	}
-
+	p.logger.Info("[+] 解析指纹文件 -> ok")
 	return p.Probes, nil
 
 }
@@ -66,7 +62,7 @@ func (p *Parse) parseFingerprint2ProbesList(fingerprintData []byte) error {
 	}
 
 	if len(lines) < 1 {
-		p.logger.Error("请在规则文件添加规则")
+		p.logger.Error("[-] ParsingNmapFingerprint -> 请在规则文件添加规则")
 		return errors.New("[-] ParsingNmapFingerprint -> 请在规则文件添加规则")
 	}
 
@@ -80,14 +76,14 @@ func (p *Parse) parseFingerprint2ProbesList(fingerprintData []byte) error {
 			lines = lines[1:]
 		}
 		if s > 1 {
-			p.logger.Error("规则文件只能有一个Exclude 设置")
+			p.logger.Error("[-] ParsingNmapFingerprint -> 规则文件只能有一个Exclude 设置")
 			return errors.New("[-] ParsingNmapFingerprint -> 规则文件只能有一个Exclude 设置")
 		}
 	}
 
 	// 规则文件第一行必需是 Exclude
 	if flag != 0 {
-		p.logger.Error("规则文件第一行必需是 Exclude")
+		p.logger.Error("[-] ParsingNmapFingerprint -> 规则文件第一行必需是 Exclude")
 		return errors.New("[-] ParsingNmapFingerprint -> 规则文件第一行必需是 Exclude")
 	}
 
