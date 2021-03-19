@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"io/ioutil"
 	"math/rand"
 	"net"
 	"strconv"
@@ -91,4 +92,19 @@ func IncludePort(targetPort string, ports string) bool {
 		}
 	}
 	return false
+}
+
+func String2strings(s string) []string {
+	s = s[1 : len(s)-1]
+	return strings.Split(s, ",")
+}
+
+func GetFile2Strings(targetFile string) ([]string, error) {
+	fileData, err := ioutil.ReadFile(targetFile)
+	if err != nil {
+		return nil, err
+	}
+	ips := strings.Split(string(fileData), "\n")
+
+	return ips, nil
 }

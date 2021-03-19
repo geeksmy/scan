@@ -1,0 +1,15 @@
+admin
+root
+a
+b
+c
+s
+x
+postgres
+oracle
+admin123
+sa
+admin213
+root123
+s00s
+toor

@@ -14,6 +14,7 @@ type Config struct {
 	Redis    redis.Conf     `yaml:"redis,omitempty"`
 	Database DatabaseConfig `yaml:"database,omitempty"`
 	Port     PortConfig     `yaml:"port,omitempty"`
+	Blasting BlastingConfig `yaml:"blasting,omitempty"`
 }
 
 type DatabaseConfig struct {
@@ -42,6 +43,20 @@ type PortConfig struct {
 	Timeout         int      `yaml:"timeout,omitempty"`
 	Thread          int      `yaml:"thread,omitempty"`
 	Retry           int      `yaml:"retry,omitempty"`
+}
+
+type BlastingConfig struct {
+	TargetHost string   `yaml:"target-host,omitempty"`
+	UserFile   string   `yaml:"user-file,omitempty"`
+	PassFile   string   `yaml:"pass-file,omitempty"`
+	Delay      int      `yaml:"delay,omitempty"`
+	Thread     int      `yaml:"thread,omitempty"`
+	Timeout    int      `yaml:"timeout,omitempty"`
+	Retry      int      `yaml:"retry,omitempty"`
+	ScanPort   bool     `yaml:"scan-port,omitempty"`
+	Services   []string `yaml:"services,omitempty"`
+	Path       string   `yaml:"path,omitempty"`
+	TomcatPath string   `yaml:"tomcat-path,omitempty"`
 }
 
 func InitLogger(debug bool, level, output string) {

@@ -35,3 +35,26 @@ port:
   timeout: 5
   thread: 20
   retry: 3
+
+blasting:
+  target-host: "target.txt"
+  user-file: "user.txt"
+  pass-file: "pass.txt"
+  delay: 0
+  thread: 100
+  timeout: 0
+  retry: 0
+  scan-port: false
+  services:
+    - "ssh"
+    - "ftp"
+    - "mssql"
+    - "mysql"
+    - "redis"
+    - "postgresql"
+    - "oracle"
+    - "http_basic"
+    - "tomcat"
+    - "telnet"
+  path: "/login"
+  tomcat-path: "/manager"

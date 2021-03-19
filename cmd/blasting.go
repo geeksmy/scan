@@ -17,9 +17,11 @@ package cmd
 
 import (
 	"scan/config"
+	"scan/controller/cli"
 	"scan/pkg/tools"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // blastingCmd represents the blasting command
@@ -30,6 +32,11 @@ func blastingCmd() *cobra.Command {
 		Long:  "弱口令爆破工具",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			tools.Banner()
+			p := cli.NewBlasting(cmd, zap.L())
+			if err := p.BlastingMain(); err != nil {
+				_ = cmd.Help()
+				return nil
+			}
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -37,6 +44,21 @@ func blastingCmd() *cobra.Command {
 			return nil
 		},
 	}
+
+	blastingCmd.PersistentFlags().StringP("target-host", "i", "", "目标文件")
+	blastingCmd.PersistentFlags().StringP("user-file", "u", "", "用户名字典")
+	blastingCmd.PersistentFlags().StringP("pass-file", "p", "", "密码字典")
+	blastingCmd.PersistentFlags().String("port", "", "默认端口")
+	blastingCmd.PersistentFlags().Int("delay", 0, "延迟")
+	blastingCmd.PersistentFlags().Int("thread", 0, "爆破线程>=1")
+	blastingCmd.PersistentFlags().Int("timeout", 0, "超时时间")
+	blastingCmd.PersistentFlags().Int("retry", 0, "重试次数 必须>=1")
+	blastingCmd.PersistentFlags().Bool("scan-port", false, "爆破前是否执行端口扫描")
+	blastingCmd.PersistentFlags().StringArrayP("services", "s", []string{},
+		`需要爆破的服务 ["ssh", "ftp", "mssql", "mysql", "redis", "postgresql", "oracle", "http_basic", "tomcat", "telnet"]`)
+	blastingCmd.PersistentFlags().String("path", "", `http_basic路径 "/login"`)
+	blastingCmd.PersistentFlags().String("tomcat-path", "", `tomcat路径 "/manager"`)
+	blastingCmd.PersistentFlags().StringP("out-file", "o", "", "输出文件 blasting.txt")
 
 	return blastingCmd
 }

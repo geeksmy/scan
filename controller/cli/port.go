@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
 	"strings"
@@ -11,7 +10,7 @@ import (
 
 	"scan/config"
 	"scan/internal/model"
-	"scan/internal/service/cli"
+	"scan/internal/service/cli/port"
 	"scan/pkg/tools"
 
 	"github.com/spf13/cobra"
@@ -31,7 +30,7 @@ type ScanResult struct {
 }
 
 // 命令行参数结构图
-type CmdArgs struct {
+type PortCmdArgs struct {
 	Protocol        string
 	FingerprintFile string
 	TargetIPs       *[]string
@@ -69,7 +68,7 @@ type Port struct {
 	logger *zap.Logger
 
 	Probes  *[]model.Probe
-	CmdArgs CmdArgs
+	CmdArgs PortCmdArgs
 }
 
 func NewPort(cmd *cobra.Command, logger *zap.Logger) *Port {
@@ -87,7 +86,7 @@ func (p *Port) PortMain() error {
 	}
 
 	// 初始化规则文件
-	parse := cli.NewParse(p.logger)
+	parse := port.NewParse(p.logger)
 	probes, err := parse.ParsingNmapFingerprint(p.CmdArgs.FingerprintFile)
 	if err != nil {
 		return err
@@ -130,10 +129,11 @@ func (p *Port) initArgs() error {
 	default:
 		p.CmdArgs.Protocol = strings.ToLower(protocol)
 	}
+
 	targetIPs, _ := p.cmd.Flags().GetStringArray("target-ips")
 	switch len(targetIPs) {
 	case 1:
-		ips, err := tools.UnfoldIPs(string2strings(targetIPs[0]))
+		ips, err := tools.UnfoldIPs(tools.String2strings(targetIPs[0]))
 		if err != nil {
 			return err
 		}
@@ -154,10 +154,11 @@ func (p *Port) initArgs() error {
 		tools.Shuffle(*ips)
 		p.CmdArgs.TargetIPs = ips
 	}
+
 	targetPorts, _ := p.cmd.Flags().GetStringArray("target-ports")
 	switch len(targetPorts) {
 	case 1:
-		ports, err := tools.UnfoldPort(string2strings(targetPorts[0]))
+		ports, err := tools.UnfoldPort(tools.String2strings(targetPorts[0]))
 		if err != nil {
 			return err
 		}
@@ -184,6 +185,7 @@ func (p *Port) initArgs() error {
 	default:
 		p.CmdArgs.Timeout = timeout
 	}
+
 	thread, _ := p.cmd.Flags().GetInt("thread")
 	switch thread {
 	case 0:
@@ -191,6 +193,7 @@ func (p *Port) initArgs() error {
 	default:
 		p.CmdArgs.Thread = thread
 	}
+
 	retry, _ := p.cmd.Flags().GetInt("retry")
 	switch retry {
 	case 0:
@@ -198,6 +201,7 @@ func (p *Port) initArgs() error {
 	default:
 		p.CmdArgs.Retry = retry
 	}
+
 	fingerprintFile, _ := p.cmd.Flags().GetString("fingerprint-file")
 	switch fingerprintFile {
 	case "":
@@ -205,6 +209,7 @@ func (p *Port) initArgs() error {
 	default:
 		p.CmdArgs.FingerprintFile = fingerprintFile
 	}
+
 	outFile, _ := p.cmd.Flags().GetString("out-file")
 	switch outFile {
 	case "":
@@ -213,12 +218,13 @@ func (p *Port) initArgs() error {
 		p.CmdArgs.OutPut = "file"
 		p.CmdArgs.OutFileName = outFile
 	}
+
 	hostsFile, _ := p.cmd.Flags().GetString("target-file")
 	switch hostsFile {
 	case "":
 		return nil
 	default:
-		ipsData, err := getTargetFile(hostsFile)
+		ipsData, err := tools.GetFile2Strings(hostsFile)
 		if err != nil {
 			p.logger.Error("[-] initArgs -> 解析目标文件失败")
 			return err
@@ -479,21 +485,21 @@ func (p *Port) outputPrinting(resultCh <-chan Result, mainWG *sync.WaitGroup) {
 	_, err := os.Stat(p.CmdArgs.OutFileName)
 	if err == nil {
 		// 如果文件存在
-		_ = os.Remove("test.txt")
+		_ = os.Remove(p.CmdArgs.OutFileName)
 	}
 
 	file, _ := os.Create(p.CmdArgs.OutFileName)
 
 	switch p.CmdArgs.OutPut {
 	case "file":
-		_, _ = file.WriteString(fmt.Sprintf("%s:%s\t\t%s\t\t\t%s\t\t\t%s\n", "目标地址", "目标端口", "服务类型", "版本信息", "Banner"))
+		// _, _ = file.WriteString(fmt.Sprintf("%s:%s\t\t%s\t\t\t%s\t\t\t%s\n", "目标地址", "目标端口", "服务类型", "版本信息", "Banner"))
 		for res := range resultCh {
 			wg.Add(1)
 			go p.outFile(res, &wg, file)
 		}
 
 	default:
-		fmt.Printf("%s:%s\t\t%s\t\t\t%s\t\t\t%s\n", "目标地址", "目标端口", "服务类型", "版本信息", "Banner")
+		// fmt.Printf("%s:%s\t\t%s\t\t\t%s\t\t\t%s\n", "目标地址", "目标端口", "服务类型", "版本信息", "Banner")
 		for res := range resultCh {
 			wg.Add(1)
 			go p.outCmd(res, &wg)
@@ -502,19 +508,4 @@ func (p *Port) outputPrinting(resultCh <-chan Result, mainWG *sync.WaitGroup) {
 
 	wg.Wait()
 	_ = file.Close()
-}
-
-func string2strings(s string) []string {
-	s = s[1 : len(s)-1]
-	return strings.Split(s, ",")
-}
-
-func getTargetFile(targetFile string) ([]string, error) {
-	fileData, err := ioutil.ReadFile(targetFile)
-	if err != nil {
-		return nil, err
-	}
-	ips := strings.Split(string(fileData), "\n")
-
-	return ips, nil
 }
