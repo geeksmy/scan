@@ -66,12 +66,12 @@ func DecodePattern(s string) ([]byte, error) {
 		// 格式控制符 \r\n\a\b\f\t
 		if isStructCode(match) {
 			structCodeMap := map[int][]byte{
-				97:  []byte{0x07}, // \a
-				102: []byte{0x0c}, // \f
-				116: []byte{0x09}, // \t
-				110: []byte{0x0a}, // \n
-				114: []byte{0x0d}, // \r
-				118: []byte{0x0b}, // \v
+				97:  {0x07}, // \a
+				102: {0x0c}, // \f
+				116: {0x09}, // \t
+				110: {0x0a}, // \n
+				114: {0x0d}, // \r
+				118: {0x0b}, // \v
 			}
 			replace = structCodeMap[int(match[1])]
 		}
@@ -111,12 +111,12 @@ func DecodeData(s string) ([]byte, error) {
 		// 格式控制符 \r\n\a\b\f\t
 		if isStructCode(match) {
 			structCodeMap := map[int][]byte{
-				97:  []byte{0x07}, // \a
-				102: []byte{0x0c}, // \f
-				116: []byte{0x09}, // \t
-				110: []byte{0x0a}, // \n
-				114: []byte{0x0d}, // \r
-				118: []byte{0x0b}, // \v
+				97:  {0x07}, // \a
+				102: {0x0c}, // \f
+				116: {0x09}, // \t
+				110: {0x0a}, // \n
+				114: {0x0d}, // \r
+				118: {0x0b}, // \v
 			}
 			replace = structCodeMap[int(match[1])]
 		}

@@ -3,18 +3,19 @@ package config
 import (
 	"os"
 
-	"github.com/geeksmy/go-lib/redis"
+	"github.com/geeksmy/go-libs/redis"
 	"github.com/jinzhu/configor"
 	"go.uber.org/zap"
 )
 
 type Config struct {
-	Debug    bool           `yaml:"debug,omitempty" default:"false" `
-	Logger   LoggerConfig   `yaml:"logger,omitempty"`
-	Redis    redis.Conf     `yaml:"redis,omitempty"`
-	Database DatabaseConfig `yaml:"database,omitempty"`
-	Port     PortConfig     `yaml:"port,omitempty"`
-	Blasting BlastingConfig `yaml:"blasting,omitempty"`
+	Debug          bool                 `yaml:"debug,omitempty" default:"false" `
+	Logger         LoggerConfig         `yaml:"logger,omitempty"`
+	Redis          redis.Conf           `yaml:"redis,omitempty"`
+	Database       DatabaseConfig       `yaml:"database,omitempty"`
+	Port           PortConfig           `yaml:"port,omitempty"`
+	Blasting       BlastingConfig       `yaml:"blasting,omitempty"`
+	WebFingerprint WebFingerprintConfig `yaml:"web_fingerprint,omitempty"`
 }
 
 type DatabaseConfig struct {
@@ -39,6 +40,7 @@ type PortConfig struct {
 	Protocol        string   `yaml:"protocol,omitempty"`
 	FingerprintFile string   `yaml:"fingerprint_file,omitempty"`
 	TargetIPs       []string `yaml:"target_ips,omitempty"`
+	TargetFile      string   `yaml:"target-file,omitempty" default:""`
 	TargetPorts     []string `yaml:"target_ports,omitempty"`
 	Timeout         int      `yaml:"timeout,omitempty"`
 	Thread          int      `yaml:"thread,omitempty"`
@@ -57,6 +59,13 @@ type BlastingConfig struct {
 	Services   []string `yaml:"services,omitempty"`
 	Path       string   `yaml:"path,omitempty"`
 	TomcatPath string   `yaml:"tomcat-path,omitempty"`
+}
+
+type WebFingerprintConfig struct {
+	TargetUrls string `yaml:"target-urls,omitempty"`
+	Thread     int    `yaml:"thread,omitempty"`
+	Timeout    int    `yaml:"timeout,omitempty"`
+	Retry      int    `yaml:"retry,omitempty"`
 }
 
 func InitLogger(debug bool, level, output string) {
@@ -112,7 +121,7 @@ func Init(cfgFile string) {
 	}
 
 	InitLogger(C.Debug, C.Logger.Level, C.Logger.Output)
-	InitRedis(C.Redis)
+	// InitRedis(C.Redis)
 
 	zap.L().Debug("[+]: 加载配置文件 ->", zap.String("文件名", cfgFile))
 }

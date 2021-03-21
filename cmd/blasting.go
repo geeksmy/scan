@@ -50,7 +50,7 @@ func blastingCmd() *cobra.Command {
 	blastingCmd.PersistentFlags().StringP("pass-file", "p", "", "密码字典")
 	blastingCmd.PersistentFlags().String("port", "", "默认端口")
 	blastingCmd.PersistentFlags().Int("delay", 0, "延迟")
-	blastingCmd.PersistentFlags().Int("thread", 0, "爆破线程>=1")
+	blastingCmd.PersistentFlags().Int("thread", 0, "线程")
 	blastingCmd.PersistentFlags().Int("timeout", 0, "超时时间")
 	blastingCmd.PersistentFlags().Int("retry", 0, "重试次数 必须>=1")
 	blastingCmd.PersistentFlags().Bool("scan-port", false, "爆破前是否执行端口扫描")

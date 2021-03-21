@@ -17,32 +17,32 @@ package cmd
 
 import (
 	"scan/config"
+	"scan/pkg/tools"
 
-	"github.com/geeksmy/go-libs/redis"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
-// poolCmd represents the pool command
-func poolCmd() *cobra.Command {
-	poolCmd := &cobra.Command{
-		Use:   "pool",
-		Short: "是否开启代理池",
-		Long:  "是否开启代理池,开启代理池需要启动redis",
+// webFingerprintCmd represents the webFingerprint command
+func webFingerprintCmd() *cobra.Command {
+	webFingerprintCmd := &cobra.Command{
+		Use:   "web-fingerprint",
+		Short: "web指纹识别",
+		Long:  "web 指纹识别工具",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			zap.L().Info("待实现.....")
+			tools.Banner()
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			config.Init(cfgFile)
-			if err := redis.Connect(); err != nil {
-				return err
-			}
 			return nil
 		},
 	}
 
-	redis.BindPflag(poolCmd.Flags(), "redis")
+	webFingerprintCmd.PersistentFlags().StringP("target-urls", "u", "", "目标 url 文件")
+	webFingerprintCmd.PersistentFlags().Int("thread", 0, "线程")
+	webFingerprintCmd.PersistentFlags().Int("timeout", 0, "超时时间")
+	webFingerprintCmd.PersistentFlags().Int("retry", 0, "重试次数 必须>=1")
+	webFingerprintCmd.PersistentFlags().StringP("out-file", "o", "", "输出文件 web-fingerprint.txt")
 
-	return poolCmd
+	return webFingerprintCmd
 }

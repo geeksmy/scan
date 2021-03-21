@@ -3,12 +3,13 @@ package serialization
 import (
 	"errors"
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 
 	"scan/internal/model"
 	"scan/pkg/tools"
+
+	"github.com/gijsbers/go-pcre"
 )
 
 func Array2Probes(array []string) (*[]model.Probe, error) {
@@ -122,31 +123,40 @@ func String2Match(s, name string) (*model.Match, error) {
 	textSplinted := strings.Split(directive.DirectiveStr, directive.Delimiter)
 	pattern, info := textSplinted[0], strings.Join(textSplinted[1:], "")
 
-	patternUnescaped, _ := tools.DecodePattern(pattern)
-	patternUnescapedStr := string([]rune(string(patternUnescaped)))
-	// TODO: 部分规则 会报错, 无法获取Regexp, 需要后期优化
-	patternCompiled, errReg := regexp.Compile(patternUnescapedStr)
+	// patternUnescaped, _ := tools.DecodePattern(pattern)
+	// patternUnescapedStr := string(patternUnescaped)
+	// patternCompiled, errReg := regexp.Compile(patternUnescapedStr)
+	patternCompiled, errReg := pcre.Compile(pattern, 0)
 	if errReg != nil {
+		fmt.Println(directive.DirectiveName, "--", pattern)
 		return nil, errors.New("解析正则表达式失败")
 	}
 
-	infos := strings.Split(info, " ")
+	// infos := strings.Split(info, "/")
 	var (
+		infos        []string
 		infoS, infoV string
 	)
-	for i := 0; i < len(infos); i++ {
-		if strings.HasPrefix(infos[i], "p/") {
-			infoS = infos[i][2 : len(infos[i])-1]
-		}
-		if strings.HasPrefix(infos[i], "v/") {
-			infoV = infos[i][2 : len(infos[i])-1]
+	if strings.Contains(info, "p/") {
+		infos = strings.Split(info, "p/")
+	}
+
+	switch len(infos) {
+	case 0:
+	case 1:
+	default:
+		infoS = strings.Split(infos[1], "/")[0]
+		if strings.Contains(infos[1], "/ v/") {
+			infos = strings.Split(infos[1], "/ v/")
+			infoS = infos[0]
+			infoV = strings.Split(infos[1], "/")[0]
 		}
 	}
 
 	res.Service = directive.DirectiveName
 	res.Pattern = pattern
 	res.VersionInfo = fmt.Sprintf("%s %s", infoS, infoV)
-	res.PatternCompiled = patternCompiled
+	res.PatternCompiled = &patternCompiled
 
 	return &res, nil
 }

@@ -16,11 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"context"
-	"fmt"
-	"os"
-	"os/signal"
-
 	"scan/pkg/tools"
 
 	"github.com/spf13/cobra"
@@ -30,7 +25,7 @@ var (
 	cfgFile string
 )
 
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:          "scan",
 	SilenceUsage: true,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -40,46 +35,47 @@ var rootCmd = &cobra.Command{
 }
 
 // Execute is the main cobra method
-func Execute() {
-	var cancel context.CancelFunc
-	mainContext, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-	defer func() {
-		signal.Stop(signalChan)
-		cancel()
-	}()
-	go func() {
-		select {
-		case <-signalChan:
-			// caught CTRL+C
-			fmt.Println("\n[!] 检测到键盘中断，正在终止。")
-			cancel()
-		case <-mainContext.Done():
-		}
-	}()
-
-	if err := rootCmd.Execute(); err != nil {
-		// Leaving this in results in the same error appearing twice
-		// Once before and once after the help output. Not sure if
-		// this is going to be needed to output other errors that
-		// aren't automatically outputted.
-		// fmt.Println(err)
-		os.Exit(1)
-	}
-}
+// func Execute() {
+// 	var cancel context.CancelFunc
+// 	mainContext, cancel := context.WithCancel(context.Background())
+// 	defer cancel()
+//
+// 	signalChan := make(chan os.Signal, 1)
+// 	signal.Notify(signalChan, os.Interrupt)
+// 	defer func() {
+// 		signal.Stop(signalChan)
+// 		cancel()
+// 	}()
+// 	go func() {
+// 		select {
+// 		case <-signalChan:
+// 			// caught CTRL+C
+// 			fmt.Println("\n[!] 检测到键盘中断，正在终止。")
+// 			cancel()
+// 		case <-mainContext.Done():
+// 		}
+// 	}()
+//
+// 	if err := rootCmd.Execute(); err != nil {
+// 		// Leaving this in results in the same error appearing twice
+// 		// Once before and once after the help output. Not sure if
+// 		// this is going to be needed to output other errors that
+// 		// aren't automatically outputted.
+// 		// fmt.Println(err)
+// 		os.Exit(1)
+// 	}
+// }
 
 func init() {
 	// 全局配置
 	// rootCmd.PersistentFlags().StringP("url", "u", "", "需要扫描的ip或url")
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "配置文件路径")
+	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "配置文件路径")
 
 	// 新增命令
-	rootCmd.AddCommand(portCmd())
-	rootCmd.AddCommand(blastingCmd())
-	rootCmd.AddCommand(versionCmd())
+	RootCmd.AddCommand(portCmd())
+	RootCmd.AddCommand(blastingCmd())
+	RootCmd.AddCommand(webFingerprintCmd())
+	RootCmd.AddCommand(versionCmd())
 	// rootCmd.AddCommand(poolCmd())
 	// rootCmd.AddCommand(dirCmd())
 	// rootCmd.AddCommand(dnsCmd())

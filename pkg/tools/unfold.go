@@ -105,6 +105,9 @@ func GetFile2Strings(targetFile string) ([]string, error) {
 		return nil, err
 	}
 	ips := strings.Split(string(fileData), "\n")
+	if strings.Contains(string(fileData), "\r\n") {
+		ips = strings.Split(string(fileData), "\r\n")
+	}
 
 	return ips, nil
 }

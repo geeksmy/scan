@@ -1,7 +1,7 @@
 package model
 
 import (
-	"regexp"
+	"github.com/gijsbers/go-pcre"
 )
 
 type Match struct {
@@ -11,7 +11,7 @@ type Match struct {
 	Pattern     string `gorm:"type:varchar(128);"`
 	VersionInfo string `gorm:"type:varchar(128);"`
 
-	PatternCompiled *regexp.Regexp
+	PatternCompiled *pcre.Regexp
 }
 
 func (Match) TableName() string {

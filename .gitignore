@@ -120,3 +120,7 @@ Temporary Items
 .idea
 bin
 bin/*
+pass.txt
+user.txt
+target-host.txt
+config.yml

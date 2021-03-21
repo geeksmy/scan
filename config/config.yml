@@ -22,6 +22,7 @@ port:
   fingerprint_file: "fingerprint/nmap-service-probes"
   target_ips:
     - "192.168.1.100"
+  target-file: "target-host.txt"
   target_ports:
     - "1443"
     - "22"
@@ -58,3 +59,9 @@ blasting:
     - "telnet"
   path: "/login"
   tomcat-path: "/manager"
+
+web_fingerprint:
+  target-urls: "urls.txt"
+  thread: 100
+  timeout: 0
+  retry: 0

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 
 	"scan/config"
 	"scan/pkg/tools"
@@ -69,6 +70,7 @@ func NewBlasting(cmd *cobra.Command, logger *zap.Logger) *Blasting {
 }
 
 func (b *Blasting) BlastingMain() error {
+	start := time.Now()
 	err := b.initArgs()
 	if err != nil {
 		return err
@@ -87,6 +89,8 @@ func (b *Blasting) BlastingMain() error {
 	b.outputPrinting(resultCh)
 
 	mainWG.Wait()
+	elapsed := time.Since(start)
+	b.logger.Info("代码执行时间", zap.Any("time", elapsed))
 	return nil
 }
 
