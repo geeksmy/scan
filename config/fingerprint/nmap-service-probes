@@ -15930,6 +15930,7 @@ rarity 8
 ports 6379
 match redis m|-ERR operation not permitted\r\n|s p/Redis key-value store/ cpe:/a:redislabs:redis/
 match redis m|^\$\d+\r\n(?:#[^\r\n]*\r\n)*redis_version:([.\d]+)\r\n|s p/Redis key-value store/ v/$1/ cpe:/a:redislabs:redis:$1/
+match redis m|-NOAUTH Authentication required.\r\n|s p/Redis/
 
 ##############################NEXT PROBE##############################
 # Memcached distributed memory object caching system

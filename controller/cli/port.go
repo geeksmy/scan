@@ -19,7 +19,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// 回包结构图
+// 回包结构
 type ScanResult struct {
 	IP       string
 	Port     string
@@ -31,7 +31,7 @@ type ScanResult struct {
 	Error    error
 }
 
-// 命令行参数结构图
+// 命令行参数结构
 type PortCmdArgs struct {
 	Protocol        string
 	FingerprintFile string
@@ -44,7 +44,7 @@ type PortCmdArgs struct {
 	OutFileName     string
 }
 
-// 数据包参数结构图
+// 数据包参数结构
 type PackageArgs struct {
 	Protocol   string
 	TargetIP   string
@@ -113,8 +113,8 @@ func (p *Port) PortMain() error {
 	go p.fingerprintRecognition(scanResultCh, resultCh, &mainWG)
 
 	// 输出打印
-	mainWG.Add(1)
-	go p.outputPrinting(resultCh, &mainWG)
+	// mainWG.Add(1)
+	p.outputPrinting(resultCh)
 
 	mainWG.Wait()
 	elapsed := time.Since(start)
@@ -340,14 +340,7 @@ func (p *Port) sendPackageWorker(argsCh <-chan PackageArgs, scanResultCh chan<- 
 		// 需要发送的数据
 		if len(args.Probe.Data) > 0 && scanResult.Retry < p.CmdArgs.Retry {
 			_ = conn.SetWriteDeadline(time.Now().Add(time.Duration(p.CmdArgs.Timeout) * time.Second))
-			data, err := tools.DecodeData(args.Probe.Data)
-			if err != nil {
-				scanResult.Error = err
-				scanResult.Retry += 1
-				scanResultCh <- scanResult
-				continue
-			}
-			_, err = conn.Write(data)
+			_, err = conn.Write(args.Probe.Data)
 			if err != nil {
 				scanResult.Error = err
 				scanResult.Retry += 1
@@ -426,19 +419,55 @@ func (p *Port) fingerprintRecognitionWorker(scanCh <-chan ScanResult, resultCh c
 				// 方便格式化输出
 				result.ServerType = match.Service
 				result.IsSoft = match.IsSoft
-				result.Version = match.VersionInfo
-				if strings.Contains(match.VersionInfo, "$") {
+				switch strings.Contains(match.VersionInfo, "$") {
+				case false:
+					var (
+						infos []string
+						infoS string
+					)
+					if strings.Contains(match.VersionInfo, "p/") {
+						infos = strings.Split(match.VersionInfo, "p/")
+					}
+					switch len(infos) {
+					case 0:
+					default:
+						infoS = strings.Split(infos[1], "/")[0]
+						result.Version = infoS
+					}
+				default:
 					m, err := regexp.Compile(match.Pattern)
 					if err != nil {
 						continue
 					}
 					version := m.ReplaceAllString(string(scan.Response), match.VersionInfo)
-					result.Version = version
+					if strings.Contains(match.VersionInfo, "$I") {
+						version = match.VersionInfo
+					}
+					var (
+						infos        []string
+						infoS, infoV string
+					)
+					if strings.Contains(version, "p/") {
+						infos = strings.Split(version, "p/")
+					}
+
+					switch len(infos) {
+					case 0:
+					case 1:
+						infoS = strings.Split(infos[1], "/")[0]
+					default:
+						infoS = strings.Split(infos[1], "/")[0]
+						if strings.Contains(infos[1], "/ v/") {
+							infos = strings.Split(infos[1], "/ v/")
+							infoS = infos[0]
+							infoV = strings.Split(infos[1], "/")[0]
+						}
+					}
+					result.Version = fmt.Sprintf("%s %s", infoS, infoV)
 				}
-				result.Banner = strings.Replace(string(scan.Response), "\n", "", -1)
-				if strings.Contains(string(scan.Response), "\r\n") {
-					result.Banner = strings.Replace(string(scan.Response), "\r\n", "", -1)
-				}
+
+				result.Banner = string(scan.Response)
+				resultCh <- result
 			}
 		}
 
@@ -451,26 +480,62 @@ func (p *Port) fingerprintRecognitionWorker(scanCh <-chan ScanResult, resultCh c
 							// 方便格式化输出
 							result.ServerType = match.Service
 							result.IsSoft = match.IsSoft
-							result.Version = match.VersionInfo
-							if strings.Contains(match.VersionInfo, "$") {
+							switch strings.Contains(match.VersionInfo, "$") {
+							case false:
 								m, err := regexp.Compile(match.Pattern)
 								if err != nil {
 									continue
 								}
 								version := m.ReplaceAllString(string(scan.Response), match.VersionInfo)
-								result.Version = version
+								var (
+									infos []string
+									infoS string
+								)
+								if strings.Contains(version, "p/") {
+									infos = strings.Split(version, "p/")
+								}
+								switch len(infos) {
+								case 0:
+								default:
+									infoS = strings.Split(infos[1], "/")[0]
+									result.Version = infoS
+								}
+							default:
+								m, err := regexp.Compile(match.Pattern)
+								if err != nil {
+									continue
+								}
+								version := m.ReplaceAllString(string(scan.Response), match.VersionInfo)
+								var (
+									infos        []string
+									infoS, infoV string
+								)
+								if strings.Contains(version, "p/") {
+									infos = strings.Split(version, "p/")
+								}
+
+								switch len(infos) {
+								case 0:
+								case 1:
+									infoS = strings.Split(infos[1], "/")[0]
+								default:
+									infoS = strings.Split(infos[1], "/")[0]
+									if strings.Contains(infos[1], "/ v/") {
+										infos = strings.Split(infos[1], "/ v/")
+										infoS = infos[0]
+										infoV = strings.Split(infos[1], "/")[0]
+									}
+								}
+								result.Version = fmt.Sprintf("%s %s", infoS, infoV)
 							}
-							result.Banner = strings.Replace(string(scan.Response), "\n", "", -1)
-							if strings.Contains(string(scan.Response), "\r\n") {
-								result.Banner = strings.Replace(string(scan.Response), "\r\n", "", -1)
-							}
+							result.Banner = string(scan.Response)
 						}
+						resultCh <- result
 					}
 				}
 			}
 		}
 
-		resultCh <- result
 		wg.Done()
 	}
 }
@@ -500,66 +565,70 @@ func (p *Port) fingerprintRecognition(scanResultCh <-chan ScanResult, resultCh c
 }
 
 // 输出文件
-func (p *Port) outFile(res Result, wg *sync.WaitGroup, hashMap *sync.Map, mux *sync.RWMutex, file *os.File) {
+func (p *Port) outFile(res Result, hashMap *sync.Map, mux *sync.RWMutex, file *os.File) {
 	key := fmt.Sprintf("%s:%s:%s:%s", res.IP, res.Port, res.ServerType, res.Version)
-	data := fmt.Sprintf("%s:%s\t\t%s\t\t\t%s\n", res.IP, res.Port, res.ServerType, res.Version)
+	data := fmt.Sprintf("%-20s%-10s%-20s%-30s\n", res.IP, res.Port, res.ServerType, res.Version)
 	hash := md5.New()
 	_, _ = hash.Write([]byte(data))
 	result := hash.Sum(nil)
 	mux.RLock()
 	_, ok := hashMap.Load(key)
 	mux.RUnlock()
+
+	mux.Lock()
 	if !ok {
+		// _, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-30s\n", res.IP, res.Port, res.ServerType, res.Version))
+		hashMap.Store(key, string(result))
 		fmt.Printf(data)
 		_, _ = file.WriteString(data)
-		mux.Lock()
-		hashMap.Store(key, string(result))
-		mux.Unlock()
 	}
+	mux.Unlock()
+
 	mux.RLock()
 	md5Hash, _ := hashMap.Load(key)
 	mux.RUnlock()
+
+	mux.Lock()
 	if string(result) != md5Hash {
-		fmt.Printf(data)
-		mux.Lock()
 		hashMap.Store(key, string(result))
-		mux.Unlock()
+		fmt.Printf(data)
 	}
-	wg.Done()
+	mux.Unlock()
 }
 
 // 输出屏幕
-func (p *Port) outCmd(res Result, wg *sync.WaitGroup, hashMap *sync.Map, mux *sync.RWMutex) {
+func (p *Port) outCmd(res Result, hashMap *sync.Map, mux *sync.RWMutex) {
 	key := fmt.Sprintf("%s:%s:%s:%s", res.IP, res.Port, res.ServerType, res.Version)
-	data := fmt.Sprintf("%s:%s\t\t%s\t\t\t%s\n", res.IP, res.Port, res.ServerType, res.Version)
+	data := fmt.Sprintf("%-20s%-10s%-20s%-30s\n", res.IP, res.Port, res.ServerType, res.Version)
 	hash := md5.New()
 	_, _ = hash.Write([]byte(data))
 	result := hash.Sum(nil)
 	mux.RLock()
 	_, ok := hashMap.Load(key)
 	mux.RUnlock()
+
+	mux.Lock()
 	if !ok {
-		fmt.Printf(data)
-		mux.Lock()
 		hashMap.Store(key, string(result))
-		mux.Unlock()
+		fmt.Printf(data)
 	}
+	mux.Unlock()
+
 	mux.RLock()
 	md5Hash, _ := hashMap.Load(key)
 	mux.RUnlock()
+
+	mux.Lock()
 	if string(result) != md5Hash {
 		fmt.Printf(data)
 	}
+	mux.Unlock()
 
-	wg.Done()
 }
 
 // 输出打印
-func (p *Port) outputPrinting(resultCh <-chan Result, mainWG *sync.WaitGroup) {
-	defer mainWG.Done()
-
+func (p *Port) outputPrinting(resultCh <-chan Result) {
 	var (
-		wg      sync.WaitGroup
 		hashMap sync.Map
 		mux     sync.RWMutex
 	)
@@ -574,20 +643,18 @@ func (p *Port) outputPrinting(resultCh <-chan Result, mainWG *sync.WaitGroup) {
 
 	switch p.CmdArgs.OutPut {
 	case "file":
-		// _, _ = file.WriteString(fmt.Sprintf("%s:%s\t\t%s\t\t\t%s\t\t\t%s\n", "目标地址", "目标端口", "服务类型", "版本信息", "Banner"))
+		_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-50.50s%-100.100s\n", "IP", "Port", "Server", "Server Info", "Banner"))
+		fmt.Printf("%-20s%-10s%-20s%-30s\n", "IP", "Port", "Server", "Server Info")
 		for res := range resultCh {
-			wg.Add(1)
-			go p.outFile(res, &wg, &hashMap, &mux, file)
+			p.outFile(res, &hashMap, &mux, file)
 		}
 
 	default:
-		// fmt.Printf("%s:%s\t\t%s\t\t\t%s\t\t\t%s\n", "目标地址", "目标端口", "服务类型", "版本信息", "Banner")
+		fmt.Printf("%-20s%-10s%-20s%-30s\n", "IP", "Port", "Server", "Server Info")
 		for res := range resultCh {
-			wg.Add(1)
-			go p.outCmd(res, &wg, &hashMap, &mux)
+			p.outCmd(res, &hashMap, &mux)
 		}
 	}
 
-	wg.Wait()
 	_ = file.Close()
 }

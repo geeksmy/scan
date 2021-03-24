@@ -21,7 +21,7 @@ func (Match) TableName() string {
 type Probe struct {
 	BaseUUIDModel
 	Name     string
-	Data     string
+	Data     []byte
 	Protocol string
 
 	Ports        string

@@ -2,7 +2,6 @@ package serialization
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -50,7 +49,10 @@ func String2Probe(s string) (*model.Probe, error) {
 	}
 
 	res.Name = directive.DirectiveName
-	res.Data = strings.Split(directive.DirectiveStr, directive.Delimiter)[0]
+	res.Data, err = tools.DecodeData(strings.Split(directive.DirectiveStr, directive.Delimiter)[0])
+	if err != nil {
+		return nil, err
+	}
 	res.Protocol = strings.ToLower(strings.TrimSpace(protocol))
 
 	for i := 0; i < len(lines); i++ {
@@ -123,39 +125,14 @@ func String2Match(s, name string) (*model.Match, error) {
 	textSplinted := strings.Split(directive.DirectiveStr, directive.Delimiter)
 	pattern, info := textSplinted[0], strings.Join(textSplinted[1:], "")
 
-	// patternUnescaped, _ := tools.DecodePattern(pattern)
-	// patternUnescapedStr := string(patternUnescaped)
-	// patternCompiled, errReg := regexp.Compile(patternUnescapedStr)
 	patternCompiled, errReg := pcre.Compile(pattern, 0)
 	if errReg != nil {
-		fmt.Println(directive.DirectiveName, "--", pattern)
 		return nil, errors.New("解析正则表达式失败")
-	}
-
-	// infos := strings.Split(info, "/")
-	var (
-		infos        []string
-		infoS, infoV string
-	)
-	if strings.Contains(info, "p/") {
-		infos = strings.Split(info, "p/")
-	}
-
-	switch len(infos) {
-	case 0:
-	case 1:
-	default:
-		infoS = strings.Split(infos[1], "/")[0]
-		if strings.Contains(infos[1], "/ v/") {
-			infos = strings.Split(infos[1], "/ v/")
-			infoS = infos[0]
-			infoV = strings.Split(infos[1], "/")[0]
-		}
 	}
 
 	res.Service = directive.DirectiveName
 	res.Pattern = pattern
-	res.VersionInfo = fmt.Sprintf("%s %s", infoS, infoV)
+	res.VersionInfo = info
 	res.PatternCompiled = &patternCompiled
 
 	return &res, nil
