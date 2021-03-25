@@ -1,8 +1,10 @@
 package tools
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 func isHexCode(b []byte) bool {
@@ -11,7 +13,7 @@ func isHexCode(b []byte) bool {
 }
 
 func isOctalCode(b []byte) bool {
-	matchRe := regexp.MustCompile(`\\[0-7]{1,3}`)
+	matchRe := regexp.MustCompile(`\\[0-7]`)
 	return matchRe.Match(b)
 }
 
@@ -37,7 +39,7 @@ func isOtherEscapeCode(b []byte) bool {
 
 func DecodeData(s string) ([]byte, error) {
 	sByteOrigin := []byte(s)
-	matchRe := regexp.MustCompile(`\\(x[0-9a-fA-F]{2}|[0-7]{1,3}|[aftnrv])`)
+	matchRe := regexp.MustCompile(`\\(x[0-9a-fA-F]{2}|[0-7]|[aftnrv])`)
 	sByteDec := matchRe.ReplaceAllFunc(sByteOrigin, func(match []byte) (v []byte) {
 		var replace []byte
 		// 十六进制转义格式
@@ -78,4 +80,29 @@ func DecodeData(s string) ([]byte, error) {
 		return replace
 	})
 	return sByteDec2, nil
+}
+
+func Unicode2UTF8(source string) string {
+	var res = []string{""}
+	sUnicode := strings.Split(source, "\\u")
+	var context = ""
+	for _, v := range sUnicode {
+		var additional = ""
+		if len(v) < 1 {
+			continue
+		}
+		if len(v) > 4 {
+			rs := []rune(v)
+			v = string(rs[:4])
+			additional = string(rs[4:])
+		}
+		temp, err := strconv.ParseInt(v, 16, 32)
+		if err != nil {
+			context += v
+		}
+		context += fmt.Sprintf("%c", temp)
+		context += additional
+	}
+	res = append(res, context)
+	return strings.Join(res, "")
 }

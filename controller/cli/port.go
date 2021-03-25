@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"crypto/md5"
 	"fmt"
 	"net"
 	"os"
@@ -71,6 +70,8 @@ type Port struct {
 
 	Probes  *[]model.Probe
 	CmdArgs PortCmdArgs
+
+	Results []Result
 }
 
 func NewPort(cmd *cobra.Command, logger *zap.Logger) *Port {
@@ -296,6 +297,7 @@ func (p *Port) initPackageArgs(packageArgsCh chan PackageArgs, mainWG *sync.Wait
 	defer mainWG.Done()
 	defer close(packageArgsCh)
 
+	p.logger.Info("[+] 初始化扫描参数")
 	targetPorts := *p.CmdArgs.TargetPorts
 	portCh := make(chan string, p.CmdArgs.Thread)
 	var wg sync.WaitGroup
@@ -338,7 +340,7 @@ func (p *Port) sendPackageWorker(argsCh <-chan PackageArgs, scanResultCh chan<- 
 		scanResult.State = true
 
 		// 需要发送的数据
-		if len(args.Probe.Data) > 0 && scanResult.Retry < p.CmdArgs.Retry {
+		if len(args.Probe.Data) > 0 {
 			_ = conn.SetWriteDeadline(time.Now().Add(time.Duration(p.CmdArgs.Timeout) * time.Second))
 			_, err = conn.Write(args.Probe.Data)
 			if err != nil {
@@ -381,6 +383,7 @@ func (p *Port) sendPackage(packageArgsCh <-chan PackageArgs, scanResultCh chan S
 	defer mainWG.Done()
 	defer close(scanResultCh)
 
+	p.logger.Info("[+] 发送数据包")
 	argsCh := make(chan PackageArgs, p.CmdArgs.Thread)
 	var wg sync.WaitGroup
 
@@ -397,145 +400,165 @@ func (p *Port) sendPackage(packageArgsCh <-chan PackageArgs, scanResultCh chan S
 	close(argsCh)
 }
 
-// 指纹识别线程池
-func (p *Port) fingerprintRecognitionWorker(scanCh <-chan ScanResult, resultCh chan<- Result, wg *sync.WaitGroup) {
-	for scan := range scanCh {
-		result := Result{
-			IP:       scan.IP,
-			Port:     scan.Port,
-			Protocol: scan.Protocol,
-			Retry:    scan.Retry,
-		}
+// 指纹识别逻辑
+func (p *Port) fingerprintRecognitionLogic(matchs []*model.Match, resultCh chan<- Result, scanResult ScanResult, i int) *Result {
+	result := Result{
+		IP:       scanResult.IP,
+		Port:     scanResult.Port,
+		Protocol: scanResult.Protocol,
+		Retry:    i,
+		Banner:   string(scanResult.Response),
+	}
 
-		switch scan.State {
-		case false:
-			result.State = "Close"
-		default:
-			result.State = "Open"
-		}
+	// if strings.Contains(string(scanResult.Response), "\\u") {
+	// 	// 转换
+	// 	result.Banner = tools.Unicode2UTF8(result.Banner)
+	// }
 
-		for _, match := range scan.Probe.Matchs {
-			if match.PatternCompiled.Matcher(scan.Response, 0).Matches() {
-				// 方便格式化输出
-				result.ServerType = match.Service
-				result.IsSoft = match.IsSoft
-				switch strings.Contains(match.VersionInfo, "$") {
-				case false:
-					var (
-						infos []string
-						infoS string
-					)
-					if strings.Contains(match.VersionInfo, "p/") {
-						infos = strings.Split(match.VersionInfo, "p/")
-					}
-					switch len(infos) {
-					case 0:
-					default:
-						infoS = strings.Split(infos[1], "/")[0]
-						result.Version = infoS
-					}
+	switch scanResult.State {
+	case false:
+		result.State = "Close"
+	default:
+		result.State = "Open"
+	}
+
+	for _, match := range matchs {
+		if match.PatternCompiled.MatcherString(result.Banner, 0).Matches() {
+			// 方便格式化输出
+			result.ServerType = match.Service
+			result.IsSoft = match.IsSoft
+			switch strings.Contains(match.VersionInfo, "$") {
+			case false:
+				var (
+					infos []string
+					infoS string
+				)
+				if strings.Contains(match.VersionInfo, "p/") {
+					infos = strings.Split(match.VersionInfo, "p/")
+				}
+				switch len(infos) {
+				case 0:
 				default:
-					m, err := regexp.Compile(match.Pattern)
-					if err != nil {
-						continue
-					}
-					version := m.ReplaceAllString(string(scan.Response), match.VersionInfo)
-					if strings.Contains(match.VersionInfo, "$I") {
-						version = match.VersionInfo
-					}
-					var (
-						infos        []string
-						infoS, infoV string
-					)
-					if strings.Contains(version, "p/") {
-						infos = strings.Split(version, "p/")
-					}
-
-					switch len(infos) {
-					case 0:
-					case 1:
-						infoS = strings.Split(infos[1], "/")[0]
-					default:
-						infoS = strings.Split(infos[1], "/")[0]
-						if strings.Contains(infos[1], "/ v/") {
-							infos = strings.Split(infos[1], "/ v/")
-							infoS = infos[0]
-							infoV = strings.Split(infos[1], "/")[0]
-						}
-					}
-					result.Version = fmt.Sprintf("%s %s", infoS, infoV)
+					infoS = strings.Split(infos[1], "/")[0]
+					result.Version = infoS
+					resultCh <- result
+				}
+			default:
+				m, err := regexp.Compile(match.Pattern)
+				if err != nil {
+					continue
+				}
+				version := m.ReplaceAllString(string(scanResult.Response), match.VersionInfo)
+				// version = match.PatternCompiled.ReplaceAllString()
+				if strings.Contains(match.VersionInfo, "$I") {
+					version = match.VersionInfo
+				}
+				var (
+					infos        []string
+					infoS, infoV string
+				)
+				if strings.Contains(version, "p/") {
+					infos = strings.Split(version, "p/")
 				}
 
-				result.Banner = string(scan.Response)
+				switch len(infos) {
+				case 0:
+				case 1:
+					infoS = strings.Split(infos[1], "/")[0]
+				default:
+					infoS = strings.Split(infos[1], "/")[0]
+					if strings.Contains(infos[1], "/ v/") {
+						infos = strings.Split(infos[1], "/ v/")
+						infoS = infos[0]
+						infoV = strings.Split(infos[1], "/")[0]
+					}
+				}
+				result.Version = fmt.Sprintf("%s %s", infoS, infoV)
 				resultCh <- result
 			}
 		}
+	}
 
-		// 如果上面没有找到,则全局搜索
-		if result.ServerType == "" && result.Version == "" {
-			for _, probe := range *p.Probes {
-				if strings.ToLower(result.Protocol) == strings.ToLower(probe.Protocol) {
-					for _, match := range probe.Matchs {
-						if match.PatternCompiled.Matcher(scan.Response, 0).Matches() {
-							// 方便格式化输出
-							result.ServerType = match.Service
-							result.IsSoft = match.IsSoft
-							switch strings.Contains(match.VersionInfo, "$") {
-							case false:
-								m, err := regexp.Compile(match.Pattern)
-								if err != nil {
-									continue
-								}
-								version := m.ReplaceAllString(string(scan.Response), match.VersionInfo)
-								var (
-									infos []string
-									infoS string
-								)
-								if strings.Contains(version, "p/") {
-									infos = strings.Split(version, "p/")
-								}
-								switch len(infos) {
-								case 0:
-								default:
-									infoS = strings.Split(infos[1], "/")[0]
-									result.Version = infoS
-								}
-							default:
-								m, err := regexp.Compile(match.Pattern)
-								if err != nil {
-									continue
-								}
-								version := m.ReplaceAllString(string(scan.Response), match.VersionInfo)
-								var (
-									infos        []string
-									infoS, infoV string
-								)
-								if strings.Contains(version, "p/") {
-									infos = strings.Split(version, "p/")
-								}
-
-								switch len(infos) {
-								case 0:
-								case 1:
-									infoS = strings.Split(infos[1], "/")[0]
-								default:
-									infoS = strings.Split(infos[1], "/")[0]
-									if strings.Contains(infos[1], "/ v/") {
-										infos = strings.Split(infos[1], "/ v/")
-										infoS = infos[0]
-										infoV = strings.Split(infos[1], "/")[0]
-									}
-								}
-								result.Version = fmt.Sprintf("%s %s", infoS, infoV)
+	// 如果上面没有找到,则全局搜索
+	if result.ServerType == "" && result.Version == "" {
+		for _, probe := range *p.Probes {
+			if strings.ToLower(result.Protocol) == strings.ToLower(probe.Protocol) {
+				for _, match := range probe.Matchs {
+					if match.PatternCompiled.Matcher(scanResult.Response, 0).Matches() {
+						// 方便格式化输出
+						result.ServerType = match.Service
+						result.IsSoft = match.IsSoft
+						switch strings.Contains(match.VersionInfo, "$") {
+						case false:
+							m, err := regexp.Compile(match.Pattern)
+							if err != nil {
+								continue
 							}
-							result.Banner = string(scan.Response)
+							version := m.ReplaceAllString(string(scanResult.Response), match.VersionInfo)
+							var (
+								infos []string
+								infoS string
+							)
+							if strings.Contains(version, "p/") {
+								infos = strings.Split(version, "p/")
+							}
+							switch len(infos) {
+							case 0:
+							default:
+								infoS = strings.Split(infos[1], "/")[0]
+								result.Version = infoS
+								resultCh <- result
+							}
+						default:
+							m, err := regexp.Compile(match.Pattern)
+							if err != nil {
+								continue
+							}
+							version := m.ReplaceAllString(string(scanResult.Response), match.VersionInfo)
+							var (
+								infos        []string
+								infoS, infoV string
+							)
+							if strings.Contains(version, "p/") {
+								infos = strings.Split(version, "p/")
+							}
+
+							switch len(infos) {
+							case 0:
+							case 1:
+								infoS = strings.Split(infos[1], "/")[0]
+							default:
+								infoS = strings.Split(infos[1], "/")[0]
+								if strings.Contains(infos[1], "/ v/") {
+									infos = strings.Split(infos[1], "/ v/")
+									infoS = infos[0]
+									infoV = strings.Split(infos[1], "/")[0]
+								}
+							}
+							result.Version = fmt.Sprintf("%s %s", infoS, infoV)
+							resultCh <- result
 						}
-						resultCh <- result
 					}
 				}
 			}
 		}
+	}
 
+	return &result
+}
+
+// 指纹识别线程池
+func (p *Port) fingerprintRecognitionWorker(scanCh <-chan ScanResult, resultCh chan<- Result, wg *sync.WaitGroup) {
+	for scan := range scanCh {
+		result := new(Result)
+
+		for i := 0; i < p.CmdArgs.Retry; i++ {
+			if (result.Version == "" || result.Version == " ") && result.Retry < p.CmdArgs.Retry {
+				result = p.fingerprintRecognitionLogic(scan.Probe.Matchs, resultCh, scan, i)
+			}
+		}
+
+		resultCh <- *result
 		wg.Done()
 	}
 }
@@ -545,6 +568,7 @@ func (p *Port) fingerprintRecognition(scanResultCh <-chan ScanResult, resultCh c
 	defer mainWG.Done()
 	defer close(resultCh)
 
+	p.logger.Info("[+] 指纹识别")
 	scanCh := make(chan ScanResult, p.CmdArgs.Thread)
 	var wg sync.WaitGroup
 
@@ -564,66 +588,50 @@ func (p *Port) fingerprintRecognition(scanResultCh <-chan ScanResult, resultCh c
 	close(scanCh)
 }
 
-// 输出文件
-func (p *Port) outFile(res Result, hashMap *sync.Map, mux *sync.RWMutex, file *os.File) {
-	key := fmt.Sprintf("%s:%s:%s:%s", res.IP, res.Port, res.ServerType, res.Version)
-	data := fmt.Sprintf("%-20s%-10s%-20s%-30s\n", res.IP, res.Port, res.ServerType, res.Version)
-	hash := md5.New()
-	_, _ = hash.Write([]byte(data))
-	result := hash.Sum(nil)
-	mux.RLock()
-	_, ok := hashMap.Load(key)
-	mux.RUnlock()
-
-	mux.Lock()
-	if !ok {
-		// _, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-30s\n", res.IP, res.Port, res.ServerType, res.Version))
-		hashMap.Store(key, string(result))
-		fmt.Printf(data)
-		_, _ = file.WriteString(data)
-	}
-	mux.Unlock()
+// 去重
+func (p *Port) chanRemoveSliceMap(res Result, hashMap *sync.Map, mux *sync.RWMutex) {
+	// p.logger.Info("[+] 去重", zap.Any("result", res))
+	key := fmt.Sprintf("%s:%s", res.IP, res.Port)
 
 	mux.RLock()
-	md5Hash, _ := hashMap.Load(key)
+	val, ok := hashMap.Load(key)
 	mux.RUnlock()
 
-	mux.Lock()
-	if string(result) != md5Hash {
-		hashMap.Store(key, string(result))
-		fmt.Printf(data)
+	if ok {
+		if res.ServerType != "" && val.(Result).ServerType != "" {
+			if len(res.ServerType) > len(val.(Result).ServerType) {
+				mux.Lock()
+				hashMap.Store(key, res)
+				mux.Unlock()
+			}
+		} else if res.ServerType != "" {
+			mux.Lock()
+			hashMap.Store(key, res)
+			mux.Unlock()
+		}
+		if res.Version != "" && val.(Result).Version != "" {
+			if len(res.Version) > len(val.(Result).Version) {
+				mux.Lock()
+				hashMap.Store(key, res)
+				mux.Unlock()
+			}
+		} else if res.Version != "" {
+			mux.Lock()
+			hashMap.Store(key, res)
+			mux.Unlock()
+		}
+		if (res.Version == " " && val.(Result).Version == " ") || (res.Version == "" && val.(Result).Version == "") {
+			if res.Retry > val.(Result).Retry {
+				mux.Lock()
+				hashMap.Store(key, res)
+				mux.Unlock()
+			}
+		}
+	} else {
+		mux.Lock()
+		hashMap.Store(key, res)
+		mux.Unlock()
 	}
-	mux.Unlock()
-}
-
-// 输出屏幕
-func (p *Port) outCmd(res Result, hashMap *sync.Map, mux *sync.RWMutex) {
-	key := fmt.Sprintf("%s:%s:%s:%s", res.IP, res.Port, res.ServerType, res.Version)
-	data := fmt.Sprintf("%-20s%-10s%-20s%-30s\n", res.IP, res.Port, res.ServerType, res.Version)
-	hash := md5.New()
-	_, _ = hash.Write([]byte(data))
-	result := hash.Sum(nil)
-	mux.RLock()
-	_, ok := hashMap.Load(key)
-	mux.RUnlock()
-
-	mux.Lock()
-	if !ok {
-		hashMap.Store(key, string(result))
-		fmt.Printf(data)
-	}
-	mux.Unlock()
-
-	mux.RLock()
-	md5Hash, _ := hashMap.Load(key)
-	mux.RUnlock()
-
-	mux.Lock()
-	if string(result) != md5Hash {
-		fmt.Printf(data)
-	}
-	mux.Unlock()
-
 }
 
 // 输出打印
@@ -632,6 +640,11 @@ func (p *Port) outputPrinting(resultCh <-chan Result) {
 		hashMap sync.Map
 		mux     sync.RWMutex
 	)
+
+	// 去重
+	for res := range resultCh {
+		p.chanRemoveSliceMap(res, &hashMap, &mux)
+	}
 
 	_, err := os.Stat(p.CmdArgs.OutFileName)
 	if err == nil {
@@ -643,17 +656,20 @@ func (p *Port) outputPrinting(resultCh <-chan Result) {
 
 	switch p.CmdArgs.OutPut {
 	case "file":
-		_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-50.50s%-100.100s\n", "IP", "Port", "Server", "Server Info", "Banner"))
-		fmt.Printf("%-20s%-10s%-20s%-30s\n", "IP", "Port", "Server", "Server Info")
-		for res := range resultCh {
-			p.outFile(res, &hashMap, &mux, file)
-		}
+		_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-50.45s%-100.95s\n", "IP", "Port", "Server", "Server Info", "Banner"))
+		fmt.Printf("%-20s%-10s%-20s%-50.45s%-5s\n", "IP", "Port", "Server", "Server Info", "retry")
+		hashMap.Range(func(key, value interface{}) bool {
+			fmt.Printf("%-20s%-10s%-20s%-50.45s%-1d\n", value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version, value.(Result).Retry)
+			_, err = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-50.45s\n", value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version))
+			return true
+		})
 
 	default:
-		fmt.Printf("%-20s%-10s%-20s%-30s\n", "IP", "Port", "Server", "Server Info")
-		for res := range resultCh {
-			p.outCmd(res, &hashMap, &mux)
-		}
+		fmt.Printf("%-20s%-10s%-20s%-50.45s%-5s\n", "IP", "Port", "Server", "Server Info", "retry")
+		hashMap.Range(func(key, value interface{}) bool {
+			fmt.Printf("%-20s%-10s%-20s%-50.45s%-1d\n", value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version, value.(Result).Retry)
+			return true
+		})
 	}
 
 	_ = file.Close()
