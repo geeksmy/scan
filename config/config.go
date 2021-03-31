@@ -15,7 +15,7 @@ type Config struct {
 	Database       DatabaseConfig       `yaml:"database,omitempty"`
 	Port           PortConfig           `yaml:"port,omitempty"`
 	Blasting       BlastingConfig       `yaml:"blasting,omitempty"`
-	WebFingerprint WebFingerprintConfig `yaml:"web_fingerprint,omitempty"`
+	WebFingerprint WebFingerprintConfig `yaml:"web-fingerprint,omitempty"`
 }
 
 type DatabaseConfig struct {
@@ -39,9 +39,9 @@ type LoggerConfig struct {
 type PortConfig struct {
 	Protocol        string   `yaml:"protocol,omitempty"`
 	FingerprintFile string   `yaml:"fingerprint_file,omitempty"`
-	TargetIPs       []string `yaml:"target_ips,omitempty"`
+	TargetIPs       []string `yaml:"target-ips,omitempty"`
 	TargetFile      string   `yaml:"target-file,omitempty" default:""`
-	TargetPorts     []string `yaml:"target_ports,omitempty"`
+	TargetPorts     []string `yaml:"target-ports,omitempty"`
 	Timeout         int      `yaml:"timeout,omitempty"`
 	Thread          int      `yaml:"thread,omitempty"`
 	Retry           int      `yaml:"retry,omitempty"`
@@ -62,10 +62,12 @@ type BlastingConfig struct {
 }
 
 type WebFingerprintConfig struct {
-	TargetUrls string `yaml:"target-urls,omitempty"`
-	Thread     int    `yaml:"thread,omitempty"`
-	Timeout    int    `yaml:"timeout,omitempty"`
-	Retry      int    `yaml:"retry,omitempty"`
+	TargetUrls      string   `yaml:"target-urls,omitempty"`
+	TargetPorts     []string `yaml:"target-ports,omitempty"`
+	FingerprintName string   `yaml:"fingerprint-name,omitempty"`
+	Thread          int      `yaml:"thread,omitempty"`
+	Timeout         int      `yaml:"timeout,omitempty"`
+	Retry           int      `yaml:"retry,omitempty"`
 }
 
 func InitLogger(debug bool, level, output string) {

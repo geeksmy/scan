@@ -17,9 +17,11 @@ package cmd
 
 import (
 	"scan/config"
+	"scan/controller/cli"
 	"scan/pkg/tools"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // webFingerprintCmd represents the webFingerprint command
@@ -30,6 +32,11 @@ func webFingerprintCmd() *cobra.Command {
 		Long:  "web 指纹识别工具",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			tools.Banner()
+			p := cli.NewWebFingerprint(cmd, zap.L())
+			if err := p.WebFingerprintMain(); err != nil {
+				_ = cmd.Help()
+				return nil
+			}
 			return nil
 		},
 		PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -43,6 +50,8 @@ func webFingerprintCmd() *cobra.Command {
 	webFingerprintCmd.PersistentFlags().Int("timeout", 0, "超时时间")
 	webFingerprintCmd.PersistentFlags().Int("retry", 0, "重试次数 必须>=1")
 	webFingerprintCmd.PersistentFlags().StringP("out-file", "o", "", "输出文件 web-fingerprint.txt")
+	webFingerprintCmd.PersistentFlags().StringArrayP("target-ports", "p", []string{}, `需要扫描的端口列表 ["80", "443"]`)
+	webFingerprintCmd.PersistentFlags().StringP("fingerprint-file", "f", "", "规则或者指纹文件")
 
 	return webFingerprintCmd
 }

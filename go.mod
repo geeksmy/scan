@@ -4,6 +4,8 @@ go 1.15
 
 require (
 	github.com/3th1nk/cidr v0.0.0-20200222033026-ac57bd3ad921
+	github.com/EDDYCJY/fake-useragent v0.2.0
+	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/geeksmy/go-libs v0.0.0-20210119081920-06d5b69154f4
 	github.com/gijsbers/go-pcre v0.0.0-20161214203829-a84f3096ab3c
@@ -28,11 +30,12 @@ require (
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.7.1 // indirect
+	github.com/twmb/murmur3 v1.1.5
 	github.com/vbauerster/mpb/v6 v6.0.2 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
-	golang.org/x/sys v0.0.0-20210319071255-635bc2c9138d // indirect
+	golang.org/x/sys v0.0.0-20210326220804-49726bf1d181 // indirect
 	golang.org/x/text v0.3.5 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect

@@ -19,11 +19,11 @@ Database:
 
 port:
   protocol: "tcp"
-  fingerprint_file: "fingerprint/nmap-service-probes"
-  target_ips:
+  fingerprint-file: "fingerprint/nmap-service-probes"
+  target-ips:
     - "192.168.1.100"
   target-file: "target-host.txt"
-  target_ports:
+  target-ports:
     - "1443"
     - "22"
     - "445"
@@ -60,8 +60,12 @@ blasting:
   path: "/login"
   tomcat-path: "/manager"
 
-web_fingerprint:
+web-fingerprint:
   target-urls: "urls.txt"
+  target-ports:
+    - 80
+    - 443
+  fingerprint-name: "fingerprint/finger.json"
   thread: 100
   timeout: 0
   retry: 0

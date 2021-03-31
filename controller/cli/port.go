@@ -11,7 +11,7 @@ import (
 
 	"scan/config"
 	"scan/internal/model"
-	"scan/internal/service/cli/port"
+	"scan/internal/service/port"
 	"scan/pkg/tools"
 
 	"github.com/spf13/cobra"
@@ -143,9 +143,9 @@ func (p *Port) initArgs() error {
 		if err != nil {
 			return err
 		}
+		tools.Shuffle(*ips)
 		p.CmdArgs.TargetIPs = ips
 	case 0:
-
 		ips, err := tools.UnfoldIPs(conf.Port.TargetIPs)
 		if err != nil {
 			return err
@@ -593,44 +593,30 @@ func (p *Port) chanRemoveSliceMap(res Result, hashMap *sync.Map, mux *sync.RWMut
 	// p.logger.Info("[+] 去重", zap.Any("result", res))
 	key := fmt.Sprintf("%s:%s", res.IP, res.Port)
 
-	mux.RLock()
 	val, ok := hashMap.Load(key)
-	mux.RUnlock()
 
 	if ok {
 		if res.ServerType != "" && val.(Result).ServerType != "" {
 			if len(res.ServerType) > len(val.(Result).ServerType) {
-				mux.Lock()
 				hashMap.Store(key, res)
-				mux.Unlock()
 			}
 		} else if res.ServerType != "" {
-			mux.Lock()
 			hashMap.Store(key, res)
-			mux.Unlock()
 		}
 		if res.Version != "" && val.(Result).Version != "" {
 			if len(res.Version) > len(val.(Result).Version) {
-				mux.Lock()
 				hashMap.Store(key, res)
-				mux.Unlock()
 			}
 		} else if res.Version != "" {
-			mux.Lock()
 			hashMap.Store(key, res)
-			mux.Unlock()
 		}
 		if (res.Version == " " && val.(Result).Version == " ") || (res.Version == "" && val.(Result).Version == "") {
 			if res.Retry > val.(Result).Retry {
-				mux.Lock()
 				hashMap.Store(key, res)
-				mux.Unlock()
 			}
 		}
 	} else {
-		mux.Lock()
 		hashMap.Store(key, res)
-		mux.Unlock()
 	}
 }
 
@@ -660,7 +646,7 @@ func (p *Port) outputPrinting(resultCh <-chan Result) {
 		fmt.Printf("%-20s%-10s%-20s%-50.45s%-5s\n", "IP", "Port", "Server", "Server Info", "retry")
 		hashMap.Range(func(key, value interface{}) bool {
 			fmt.Printf("%-20s%-10s%-20s%-50.45s%-1d\n", value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version, value.(Result).Retry)
-			_, err = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-50.45s\n", value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version))
+			_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-50.45s\n", value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version))
 			return true
 		})
 
