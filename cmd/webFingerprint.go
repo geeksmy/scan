@@ -18,7 +18,6 @@ package cmd
 import (
 	"scan/config"
 	"scan/controller/cli"
-	"scan/pkg/tools"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -31,7 +30,7 @@ func webFingerprintCmd() *cobra.Command {
 		Short: "web指纹识别",
 		Long:  "web 指纹识别工具",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			tools.Banner()
+			// tools.Banner()
 			p := cli.NewWebFingerprint(cmd, zap.L())
 			if err := p.WebFingerprintMain(); err != nil {
 				_ = cmd.Help()

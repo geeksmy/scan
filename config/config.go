@@ -29,7 +29,7 @@ type DatabaseConfig struct {
 }
 
 type LoggerConfig struct {
-	Level string `yaml:"level,omitempty" default:"debug"`
+	Level string `yaml:"level,omitempty" default:"info"`
 	// json or text
 	Format string `yaml:"format,omitempty" default:"json"`
 	// file
@@ -38,7 +38,7 @@ type LoggerConfig struct {
 
 type PortConfig struct {
 	Protocol        string   `yaml:"protocol,omitempty"`
-	FingerprintFile string   `yaml:"fingerprint_file,omitempty"`
+	FingerprintFile string   `yaml:"fingerprint-file,omitempty"`
 	TargetIPs       []string `yaml:"target-ips,omitempty"`
 	TargetFile      string   `yaml:"target-file,omitempty" default:""`
 	TargetPorts     []string `yaml:"target-ports,omitempty"`

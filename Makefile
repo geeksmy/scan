@@ -15,7 +15,7 @@ GOLINT=$(shell which golangci-lint || echo '')
 
 # build args
 BUILD_ARGS := \
-    -ldflags "-X $(VERSION_IMPORT_PATH).appName=$(PACKAGE) \
+    -ldflags "-s -w -X $(VERSION_IMPORT_PATH).appName=$(PACKAGE) \
     -X $(VERSION_IMPORT_PATH).version=$(VERSION) \
     -X $(VERSION_IMPORT_PATH).revision=$(COMMIT_ID) \
     -X $(VERSION_IMPORT_PATH).branch=$(VCS_BRANCH) \

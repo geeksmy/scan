@@ -12,6 +12,9 @@
 
 - [x] 多线程识别
 - [x] 重试次数
+- [x] 根据 body 内容识别指纹
+- [x] 根据 header 头内容识别指纹
+- [x] 根据 favicon hash 识别指纹文件
 
 ### 弱口令爆破
 
@@ -23,7 +26,7 @@
 - [x] postgresql
 - [x] oracle
 - [x] http_basic
-- [x] tomcat
+- [ ] tomcat
 - [x] telnet
 - [ ] smb
 - [ ] pop3(s)
@@ -41,6 +44,7 @@
 
 待开始...
 
-### fofa shadon 抓取目标资产
+### 网络空间抓取目标资产
 
-待开始...
+- [ ] fofa
+- [ ] shodan

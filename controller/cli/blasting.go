@@ -388,7 +388,16 @@ func (b *Blasting) blastingMainLogicWorker(ch <-chan BlastingResponse, resultCh 
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
 				result.Retry += 1
 				result.Server = response.Service
+				// 匿名登录
 				addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
+				if blasting.NewConnFTP(addr, "anonymous", "", b.BlastingCmdArgs.Timeout) {
+					result.IP = response.IP
+					result.Port = response.Port
+					result.Username = "anonymous"
+					result.Password = ""
+					resultCh <- *result
+					continue
+				}
 				if blasting.NewConnFTP(addr, response.Username, response.Password, b.BlastingCmdArgs.Timeout) {
 					result.IP = response.IP
 					result.Port = response.Port
@@ -415,6 +424,14 @@ func (b *Blasting) blastingMainLogicWorker(ch <-chan BlastingResponse, resultCh 
 				result.Retry += 1
 				result.Server = response.Service
 				addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
+				if blasting.NewConnRedis(addr, "", "") {
+					result.IP = response.IP
+					result.Port = response.Port
+					result.Username = "Anonymous access!!"
+					result.Password = ""
+					resultCh <- *result
+					continue
+				}
 				if blasting.NewConnRedis(addr, response.Username, response.Password) {
 					result.IP = response.IP
 					result.Port = response.Port

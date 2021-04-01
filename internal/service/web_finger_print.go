@@ -362,48 +362,48 @@ func identifyResponseWork(responses <-chan WebFingerPrintResponse, results chan<
 			Retry:     0,
 		}
 
-		// for i := 0; i < retry; i++ {
-		// 	if result.Retry < retry && result.FingerPrint == "" {
-		// 		for _, args := range keyword {
-		// 			switch args.Location {
-		// 			case "body":
-		// 				for i := 0; i < len(args.Keyword); i++ {
-		// 					if strings.Contains(string(response.Body), args.Keyword[i]) {
-		// 						result.FingerPrint = args.Name
-		// 						break
-		// 					}
-		// 				}
-		// 			case "header":
-		// 				for i := 0; i < len(args.Keyword); i++ {
-		// 					for _, v := range response.Header {
-		// 						for j := 0; j < len(v); j++ {
-		// 							if strings.Contains(v[i], args.Keyword[i]) {
-		// 								result.FingerPrint = args.Name
-		// 								break
-		// 							}
-		// 						}
-		// 					}
-		// 				}
-		// 			default:
-		// 				continue
-		// 			}
-		//
-		// 		}
-		//
-		// 		if response.Hash != "" && result.FingerPrint != "" {
-		// 			for _, hash := range faviconHash {
-		// 				for _, v := range hash.Keyword {
-		// 					if response.Hash == v {
-		// 						result.FingerPrint = hash.Name
-		// 						break
-		// 					}
-		// 				}
-		// 			}
-		// 		}
-		//
-		// 		result.Retry += 1
-		// 	}
-		// }
+		for i := 0; i < retry; i++ {
+			if result.Retry < retry && result.FingerPrint == "" {
+				for _, args := range keyword {
+					switch args.Location {
+					case "body":
+						for i := 0; i < len(args.Keyword); i++ {
+							if strings.Contains(string(response.Body), args.Keyword[i]) {
+								// result.FingerPrint = args.Name
+								break
+							}
+						}
+					case "header":
+						for i := 0; i < len(args.Keyword); i++ {
+							for _, v := range response.Header {
+								for j := 0; j < len(v); j++ {
+									if strings.Contains(v[i], args.Keyword[i]) {
+										// result.FingerPrint = args.Name
+										break
+									}
+								}
+							}
+						}
+					default:
+						continue
+					}
+
+				}
+
+				if response.Hash != "" && result.FingerPrint != "" {
+					for _, hash := range faviconHash {
+						for _, v := range hash.Keyword {
+							if response.Hash == v {
+								// result.FingerPrint = hash.Name
+								break
+							}
+						}
+					}
+				}
+
+				result.Retry += 1
+			}
+		}
 
 		results <- result
 		wg.Done()

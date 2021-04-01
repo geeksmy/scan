@@ -1,7 +1,7 @@
 package blasting
 
 import (
-	_ "github.com/mattn/go-oci8"
+	// _ "github.com/mattn/go-oci8"
 	"xorm.io/xorm"
 )
 

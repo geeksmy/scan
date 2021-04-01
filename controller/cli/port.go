@@ -297,7 +297,7 @@ func (p *Port) initPackageArgs(packageArgsCh chan PackageArgs, mainWG *sync.Wait
 	defer mainWG.Done()
 	defer close(packageArgsCh)
 
-	p.logger.Info("[+] 初始化扫描参数")
+	p.logger.Debug("[+] 初始化扫描参数")
 	targetPorts := *p.CmdArgs.TargetPorts
 	portCh := make(chan string, p.CmdArgs.Thread)
 	var wg sync.WaitGroup
@@ -383,7 +383,7 @@ func (p *Port) sendPackage(packageArgsCh <-chan PackageArgs, scanResultCh chan S
 	defer mainWG.Done()
 	defer close(scanResultCh)
 
-	p.logger.Info("[+] 发送数据包")
+	p.logger.Debug("[+] 发送数据包")
 	argsCh := make(chan PackageArgs, p.CmdArgs.Thread)
 	var wg sync.WaitGroup
 
@@ -568,7 +568,7 @@ func (p *Port) fingerprintRecognition(scanResultCh <-chan ScanResult, resultCh c
 	defer mainWG.Done()
 	defer close(resultCh)
 
-	p.logger.Info("[+] 指纹识别")
+	p.logger.Debug("[+] 指纹识别")
 	scanCh := make(chan ScanResult, p.CmdArgs.Thread)
 	var wg sync.WaitGroup
 

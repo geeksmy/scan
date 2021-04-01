@@ -16,8 +16,6 @@ limitations under the License.
 package cmd
 
 import (
-	"scan/pkg/tools"
-
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +27,7 @@ var RootCmd = &cobra.Command{
 	Use:          "scan",
 	SilenceUsage: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		tools.Banner()
+		// tools.Banner()
 		_ = cmd.Help()
 	},
 }
@@ -75,6 +73,7 @@ func init() {
 	RootCmd.AddCommand(portCmd())
 	RootCmd.AddCommand(blastingCmd())
 	RootCmd.AddCommand(webFingerprintCmd())
+	// RootCmd.AddCommand(cyberspaceCmd())
 	RootCmd.AddCommand(versionCmd())
 	// rootCmd.AddCommand(poolCmd())
 	// rootCmd.AddCommand(dirCmd())

@@ -18,7 +18,6 @@ package cmd
 import (
 	"scan/config"
 	"scan/controller/cli"
-	"scan/pkg/tools"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -31,7 +30,7 @@ func blastingCmd() *cobra.Command {
 		Short: "弱口令爆破",
 		Long:  "弱口令爆破工具",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			tools.Banner()
+			// tools.Banner()
 			p := cli.NewBlasting(cmd, zap.L())
 			if err := p.BlastingMain(); err != nil {
 				_ = cmd.Help()
@@ -55,7 +54,7 @@ func blastingCmd() *cobra.Command {
 	blastingCmd.PersistentFlags().Int("retry", 0, "重试次数 必须>=1")
 	blastingCmd.PersistentFlags().Bool("scan-port", false, "爆破前是否执行端口扫描")
 	blastingCmd.PersistentFlags().StringArrayP("services", "s", []string{},
-		`需要爆破的服务 ["ssh", "ftp", "mssql", "mysql", "redis", "postgresql", "oracle", "http_basic", "tomcat", "telnet"]`)
+		`需要爆破的服务 ["ssh", "ftp", "mssql", "mysql", "redis", "postgresql", "http_basic", "tomcat", "telnet"]`)
 	blastingCmd.PersistentFlags().String("path", "", `http_basic路径 "/login"`)
 	blastingCmd.PersistentFlags().String("tomcat-path", "", `tomcat路径 "/manager"`)
 	blastingCmd.PersistentFlags().StringP("out-file", "o", "", "输出文件 blasting.txt")

@@ -18,7 +18,6 @@ package cmd
 import (
 	"scan/config"
 	"scan/controller/cli"
-	"scan/pkg/tools"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -31,7 +30,7 @@ func portCmd() *cobra.Command {
 		Short: "端口扫描",
 		Long:  "端口扫描工具\n\t命令行参数权重大于配置文件参数\n\t--target-file参数权重大于--target-ips",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			tools.Banner()
+			// tools.Banner()
 			p := cli.NewPort(cmd, zap.L())
 			if err := p.PortMain(); err != nil {
 				_ = cmd.Help()

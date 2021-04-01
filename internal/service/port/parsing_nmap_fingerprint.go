@@ -26,7 +26,7 @@ func NewParse(logger *zap.Logger) *Parse {
 
 // 从nmap-service-probes文件中解析并加载规则
 func (p *Parse) ParsingNmapFingerprint(nmapFingerprintFile string) (*[]model.Probe, error) {
-	p.logger.Info("[+] 读取指纹文件 -> ", zap.String("文件名", nmapFingerprintFile))
+	p.logger.Debug("[+] 读取指纹文件 -> ", zap.String("文件名", nmapFingerprintFile))
 	// 读取 nmap-service-probes 或自定义的规则文件
 	fingerprintData, err := ioutil.ReadFile(nmapFingerprintFile)
 	if err != nil {
@@ -35,11 +35,11 @@ func (p *Parse) ParsingNmapFingerprint(nmapFingerprintFile string) (*[]model.Pro
 	}
 
 	// 解析规则文本获取Probe列表
-	p.logger.Info("[+] 解析指纹文件 -> ", zap.String("文件名", nmapFingerprintFile))
+	p.logger.Debug("[+] 解析指纹文件 -> ", zap.String("文件名", nmapFingerprintFile))
 	if err := p.parseFingerprint2ProbesList(fingerprintData); err != nil {
 		return nil, err
 	}
-	p.logger.Info("[+] 解析指纹文件 -> ok")
+	p.logger.Debug("[+] 解析指纹文件 -> ok")
 	return p.Probes, nil
 
 }
