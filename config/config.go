@@ -9,13 +9,14 @@ import (
 )
 
 type Config struct {
-	Debug          bool                 `yaml:"debug,omitempty" default:"false" `
-	Logger         LoggerConfig         `yaml:"logger,omitempty"`
-	Redis          redis.Conf           `yaml:"redis,omitempty"`
-	Database       DatabaseConfig       `yaml:"database,omitempty"`
-	Port           PortConfig           `yaml:"port,omitempty"`
-	Blasting       BlastingConfig       `yaml:"blasting,omitempty"`
-	WebFingerprint WebFingerprintConfig `yaml:"web-fingerprint,omitempty"`
+	Debug             bool                 `yaml:"debug,omitempty" default:"false" `
+	Logger            LoggerConfig         `yaml:"logger,omitempty"`
+	DisableStacktrace bool                 `yaml:"disable-stacktrace,omitempty" default:"true"`
+	Redis             redis.Conf           `yaml:"redis,omitempty"`
+	Database          DatabaseConfig       `yaml:"database,omitempty"`
+	Port              PortConfig           `yaml:"port,omitempty"`
+	Blasting          BlastingConfig       `yaml:"blasting,omitempty"`
+	WebFingerprint    WebFingerprintConfig `yaml:"web-fingerprint,omitempty"`
 }
 
 type DatabaseConfig struct {
@@ -70,7 +71,7 @@ type WebFingerprintConfig struct {
 	Retry           int      `yaml:"retry,omitempty"`
 }
 
-func InitLogger(debug bool, level, output string) {
+func InitLogger(debug, disableStacktrace bool, level, output string) {
 	var conf zap.Config
 	if debug {
 		conf = zap.NewDevelopmentConfig()
@@ -87,6 +88,7 @@ func InitLogger(debug bool, level, output string) {
 	}
 
 	conf.Level = zapLevel
+	conf.DisableStacktrace = disableStacktrace
 	conf.Encoding = "console"
 
 	if output != "" {
@@ -122,7 +124,7 @@ func Init(cfgFile string) {
 		}
 	}
 
-	InitLogger(C.Debug, C.Logger.Level, C.Logger.Output)
+	InitLogger(C.Debug, C.DisableStacktrace, C.Logger.Level, C.Logger.Output)
 	// InitRedis(C.Redis)
 
 	zap.L().Debug("[+]: 加载配置文件 ->", zap.String("文件名", cfgFile))

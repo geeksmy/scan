@@ -1,5 +1,6 @@
 # 配置文件模板
 debug: true
+disable-stacktrace: true # 是关闭印错误栈
 logger:
   level: debug
 redis:
