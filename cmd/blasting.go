@@ -26,9 +26,9 @@ import (
 // blastingCmd represents the blasting command
 func blastingCmd() *cobra.Command {
 	blastingCmd := &cobra.Command{
-		Use:   "blasting",
-		Short: "弱口令爆破",
-		Long:  "弱口令爆破工具",
+		Use:   "brute",
+		Short: "口令喷射",
+		Long:  "口令喷射工具",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// tools.Banner()
 			p := cli.NewBlasting(cmd, zap.L())

@@ -69,3 +69,7 @@ web-fingerprint:
   thread: 100
   timeout: 0
   retry: 0
+
+cyberspace:
+  engine: "fofa"
+  keyword: '"邮件"||"mail"'

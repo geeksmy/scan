@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"sync"
 	"time"
 
@@ -51,6 +52,6 @@ func (w *WebFingerprint) WebFingerprintMain() error {
 
 	mainWG.Wait()
 	elapsed := time.Since(start)
-	w.logger.Info("代码执行时间", zap.Any("time", elapsed))
+	fmt.Println("耗时 ", elapsed)
 	return nil
 }

@@ -90,7 +90,7 @@ func (b *Blasting) BlastingMain() error {
 
 	mainWG.Wait()
 	elapsed := time.Since(start)
-	b.logger.Info("代码执行时间", zap.Any("time", elapsed))
+	fmt.Println("耗时 ", elapsed)
 	return nil
 }
 
@@ -435,7 +435,6 @@ func (b *Blasting) blastingMainLogicWorker(ch <-chan BlastingResponse, resultCh 
 				if blasting.NewConnRedis(addr, response.Username, response.Password) {
 					result.IP = response.IP
 					result.Port = response.Port
-					result.Username = response.Username
 					result.Password = response.Password
 					resultCh <- *result
 				}
@@ -534,12 +533,12 @@ func (b *Blasting) blastingMainLogic(responseCh <-chan BlastingResponse, resultC
 
 // 输出文件
 func (b *Blasting) outFile(res BlastingResult, file *os.File) {
-	_, _ = file.WriteString(fmt.Sprintf("[+] [目标->] %s:%s\t[服务->] %s\t[用户名->] %s\t[密码->]%s\n", res.IP, res.Port, res.Server, res.Username, res.Password))
+	_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-20s%-20s\n", res.IP, res.Port, res.Server, res.Username, res.Password))
 }
 
 // 输出屏幕
 func (b *Blasting) outCmd(res BlastingResult) {
-	fmt.Printf("[+] [目标->] %s:%s\t[服务->] %s\t[用户名->] %s\t[密码->]%s\n", res.IP, res.Port, res.Server, res.Username, res.Password)
+	fmt.Printf("%-20s%-10s%-20s%-20s%-20s\n", res.IP, res.Port, res.Server, res.Username, res.Password)
 }
 
 // 输出打印
@@ -555,13 +554,13 @@ func (b *Blasting) outputPrinting(resultCh <-chan BlastingResult) {
 
 	switch b.BlastingCmdArgs.OutPut {
 	case "file":
-		// _, _ = file.WriteString(fmt.Sprintf("%s:%s\t\t%s\t\t%s\t\t%s\n", "ip", "port", "server", "user", "pass"))
+		_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-20s%-20s\n", "ip", "port", "server", "user", "pass"))
 		for res := range resultCh {
 			b.outFile(res, file)
 		}
 
 	default:
-		// fmt.Printf("%s:%s\t\t%s\t\t%s\t\t%s\n", "目标ip", "目标port", "目标server", "user", "pass")
+		fmt.Printf("%-20s%-10s%-20s%-20s%-20s\n", "ip", "port", "server", "user", "pass")
 		for res := range resultCh {
 			b.outCmd(res)
 		}

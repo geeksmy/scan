@@ -443,16 +443,16 @@ func (svc *WebFingerPrint) OutputPrinting(results chan WebFingerPrintResult) {
 
 	switch svc.Args.OutPut {
 	case "file":
-		_, _ = file.WriteString(fmt.Sprintf("%-30s%-30.25s%-15s%-80s%-50s\n", "url", "server", "state_code", "title", "fingerprint"))
-		fmt.Printf("%-30s%-30.25s%-15s%-80s%-50s\n", "url", "server", "state_code", "title", "fingerprint")
+		_, _ = file.WriteString(fmt.Sprintf("%-30s%-30.25s%-15s%-20s%-50s\n", "url", "server", "state_code", "fingerprint", "title"))
+		fmt.Printf("%-30s%-30.25s%-15s%-20s%-50s\n", "url", "server", "state_code", "fingerprint", "title")
 		for result := range results {
-			fmt.Printf("%-30s%-30.25s%-3d%-12s%-80s%-50s\n", result.Url, result.Server, result.StateCode, "", result.Title, result.FingerPrint)
-			_, _ = file.WriteString(fmt.Sprintf("%-30s%-30.25s%-3d%-12s%-80s%-50.45s\n", result.Url, result.Server, result.StateCode, "", result.Title, result.FingerPrint))
+			fmt.Printf("%-30s%-30.25s%-3d%-12s%-20s%-50s\n", result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title)
+			_, _ = file.WriteString(fmt.Sprintf("%-30s%-30.25s%-3d%-12s%-20s%-50.45s\n", result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title))
 		}
 	default:
-		fmt.Printf("%-30s%-30.25s%-15s%-80s%-50s\n", "url", "server", "state_code", "title", "fingerprint")
+		fmt.Printf("%-30s%-30.25s%-15s%-20s%-50s\n", "url", "server", "state_code", "fingerprint", "title")
 		for result := range results {
-			fmt.Printf("%-30s%-30.25s%-3d%-12s%-80s%-50s\n", result.Url, result.Server, result.StateCode, "", result.Title, result.FingerPrint)
+			fmt.Printf("%-30s%-30.25s%-3d%-12s%-20s%-50s\n", result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title)
 		}
 	}
 }

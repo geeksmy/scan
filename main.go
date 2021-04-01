@@ -16,9 +16,13 @@ limitations under the License.
 package main
 
 import (
+	"fmt"
+
 	"scan/cmd"
 )
 
 func main() {
+	fmt.Printf("\n")
 	_ = cmd.RootCmd.Execute()
+	fmt.Printf("\n")
 }

@@ -17,6 +17,7 @@ type Config struct {
 	Port              PortConfig           `yaml:"port,omitempty"`
 	Blasting          BlastingConfig       `yaml:"blasting,omitempty"`
 	WebFingerprint    WebFingerprintConfig `yaml:"web-fingerprint,omitempty"`
+	Cyberspace        Cyberspace           `yaml:"cyberspace,omitempty"`
 }
 
 type DatabaseConfig struct {
@@ -69,6 +70,11 @@ type WebFingerprintConfig struct {
 	Thread          int      `yaml:"thread,omitempty"`
 	Timeout         int      `yaml:"timeout,omitempty"`
 	Retry           int      `yaml:"retry,omitempty"`
+}
+
+type Cyberspace struct {
+	Engine  string `yaml:"engine,omitempty"`
+	Keyword string `yaml:"keyword,omitempty"`
 }
 
 func InitLogger(debug, disableStacktrace bool, level, output string) {

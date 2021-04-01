@@ -70,11 +70,11 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "配置文件路径")
 
 	// 新增命令
+	RootCmd.AddCommand(versionCmd())
 	RootCmd.AddCommand(portCmd())
 	RootCmd.AddCommand(blastingCmd())
 	RootCmd.AddCommand(webFingerprintCmd())
-	// RootCmd.AddCommand(cyberspaceCmd())
-	RootCmd.AddCommand(versionCmd())
+	RootCmd.AddCommand(cyberspaceCmd())
 	// rootCmd.AddCommand(poolCmd())
 	// rootCmd.AddCommand(dirCmd())
 	// rootCmd.AddCommand(dnsCmd())

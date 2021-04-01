@@ -119,7 +119,7 @@ func (p *Port) PortMain() error {
 
 	mainWG.Wait()
 	elapsed := time.Since(start)
-	p.logger.Info("代码执行时间", zap.Any("time", elapsed))
+	fmt.Println("耗时 ", elapsed)
 	return nil
 }
 

@@ -26,9 +26,9 @@ import (
 // webFingerprintCmd represents the webFingerprint command
 func webFingerprintCmd() *cobra.Command {
 	webFingerprintCmd := &cobra.Command{
-		Use:   "web-fingerprint",
-		Short: "web指纹识别",
-		Long:  "web 指纹识别工具",
+		Use:   "web",
+		Short: "web服务探测",
+		Long:  "web服务探测工具",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// tools.Banner()
 			p := cli.NewWebFingerprint(cmd, zap.L())
