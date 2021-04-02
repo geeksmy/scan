@@ -4,10 +4,9 @@ import (
 	"github.com/go-redis/redis/v7"
 )
 
-func NewConnRedis(addr, user, pass string) bool {
+func NewConnRedis(addr, pass string) bool {
 	client := redis.NewClient(&redis.Options{
 		Addr:     addr,
-		Username: user,
 		Password: pass,
 		DB:       0,
 	})

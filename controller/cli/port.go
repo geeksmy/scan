@@ -136,6 +136,10 @@ func (p *Port) initArgs() error {
 		p.CmdArgs.Protocol = strings.ToLower(protocol)
 	}
 
+	if p.CmdArgs.Protocol == "" {
+		p.CmdArgs.Protocol = "tcp"
+	}
+
 	targetIPs, _ := p.cmd.Flags().GetStringArray("target-ips")
 	switch len(targetIPs) {
 	case 1:
@@ -192,6 +196,10 @@ func (p *Port) initArgs() error {
 		p.CmdArgs.Timeout = timeout
 	}
 
+	if p.CmdArgs.Timeout <= 1 {
+		p.CmdArgs.Timeout = 1
+	}
+
 	thread, _ := p.cmd.Flags().GetInt("thread")
 	switch thread {
 	case 0:
@@ -200,12 +208,20 @@ func (p *Port) initArgs() error {
 		p.CmdArgs.Thread = thread
 	}
 
+	if p.CmdArgs.Thread <= 1 {
+		p.CmdArgs.Thread = 20
+	}
+
 	retry, _ := p.cmd.Flags().GetInt("retry")
 	switch retry {
 	case 0:
 		p.CmdArgs.Retry = conf.Port.Retry
 	default:
 		p.CmdArgs.Retry = retry
+	}
+
+	if p.CmdArgs.Retry <= 1 {
+		p.CmdArgs.Retry = 1
 	}
 
 	fingerprintFile, _ := p.cmd.Flags().GetString("fingerprint-file")
@@ -255,7 +271,6 @@ func (p *Port) initArgs() error {
 		tools.Shuffle(*ips)
 		p.CmdArgs.TargetIPs = ips
 	}
-
 	return nil
 }
 

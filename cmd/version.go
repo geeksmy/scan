@@ -24,8 +24,7 @@ import (
 func versionCmd() *cobra.Command {
 	versionCmd := &cobra.Command{
 		Use:   "version",
-		Short: "信息收集工具版本",
-		Long:  "获取当前信息收集工具版本",
+		Short: "工具当前版本",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			version.PrintVersion()
 			return nil

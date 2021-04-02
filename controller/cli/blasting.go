@@ -172,12 +172,20 @@ func (b *Blasting) initArgs() error {
 		b.BlastingCmdArgs.Delay = delay
 	}
 
+	if b.BlastingCmdArgs.Delay <= 1 {
+		b.BlastingCmdArgs.Delay = 1
+	}
+
 	thread, _ := b.cmd.Flags().GetInt("thread")
 	switch thread {
 	case 0:
 		b.BlastingCmdArgs.Thread = conf.Blasting.Thread
 	default:
 		b.BlastingCmdArgs.Thread = thread
+	}
+
+	if b.BlastingCmdArgs.Thread <= 1 {
+		b.BlastingCmdArgs.Thread = 1
 	}
 
 	timeout, _ := b.cmd.Flags().GetInt("timeout")
@@ -188,12 +196,20 @@ func (b *Blasting) initArgs() error {
 		b.BlastingCmdArgs.Timeout = timeout
 	}
 
+	if b.BlastingCmdArgs.Timeout <= 1 {
+		b.BlastingCmdArgs.Timeout = 1
+	}
+
 	retry, _ := b.cmd.Flags().GetInt("retry")
 	switch retry {
 	case 0:
 		b.BlastingCmdArgs.Retry = conf.Blasting.Retry
 	default:
 		b.BlastingCmdArgs.Retry = retry
+	}
+
+	if b.BlastingCmdArgs.Retry <= 1 {
+		b.BlastingCmdArgs.Retry = 1
 	}
 
 	scanPort, _ := b.cmd.Flags().GetBool("scan-port")
@@ -216,7 +232,8 @@ func (b *Blasting) initArgs() error {
 			b.BlastingCmdArgs.Services = &conf.Blasting.Services
 		}
 	case 1:
-		b.BlastingCmdArgs.Services = &services
+		s := tools.String2strings(services[0])
+		b.BlastingCmdArgs.Services = &s
 		port, _ := b.cmd.Flags().GetString("port")
 		b.BlastingCmdArgs.Port = port
 	default:
@@ -318,13 +335,22 @@ func (b *Blasting) generateArgsChMainLogicWorker(ipCh <-chan IPPortService, resp
 		response.IP = c.IP
 		response.Port = c.Port
 
-		for i := 0; i < len(users); i++ {
+		switch c.Service {
+		case "redis":
 			for j := 0; j < len(passwords); j++ {
-				response.Username = users[i]
 				response.Password = passwords[j]
 				responseCh <- *response
 			}
+		default:
+			for i := 0; i < len(users); i++ {
+				for j := 0; j < len(passwords); j++ {
+					response.Username = users[i]
+					response.Password = passwords[j]
+					responseCh <- *response
+				}
+			}
 		}
+
 		wg.Done()
 	}
 }
@@ -356,152 +382,163 @@ func (b *Blasting) generateArgsChMainLogic(responseCh chan BlastingResponse, mai
 // 密码爆破主逻辑线程池
 func (b *Blasting) blastingMainLogicWorker(ch <-chan BlastingResponse, resultCh chan<- BlastingResult, wg *sync.WaitGroup) {
 	for response := range ch {
-		result := new(BlastingResult)
+		result := BlastingResult{
+			Server: response.Service,
+			Retry:  0,
+		}
 		switch response.Service {
 		case "mssql":
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
-				result.Retry += 1
-				result.Server = response.Service
-				dataSourceName := fmt.Sprintf("server=%s;user id=%s;password=%s", response.IP, response.Username, response.Password)
-				if blasting.NewGormConnMssql(response.Service, dataSourceName) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = response.Username
-					result.Password = response.Password
-					resultCh <- *result
+				if result.Username == "" && result.Retry < b.BlastingCmdArgs.Retry {
+					result.Retry += 1
+					dataSourceName := fmt.Sprintf("server=%s;user id=%s;password=%s", response.IP, response.Username, response.Password)
+					if blasting.NewGormConnMssql(response.Service, dataSourceName) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Username = response.Username
+						result.Password = response.Password
+						resultCh <- result
+					}
 				}
 			}
 		case "ssh":
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
-				result.Retry += 1
-				result.Server = response.Service
-				addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
-				if blasting.NewConnSSH(addr, response.Username, response.Password, b.BlastingCmdArgs.Timeout) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = response.Username
-					result.Password = response.Password
-					resultCh <- *result
+				if result.Username == "" && result.Retry < b.BlastingCmdArgs.Retry {
+					result.Retry += 1
+					addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
+					if blasting.NewConnSSH(addr, response.Username, response.Password, b.BlastingCmdArgs.Timeout) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Username = response.Username
+						result.Password = response.Password
+						resultCh <- result
+					}
 				}
 			}
 		case "ftp":
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
-				result.Retry += 1
-				result.Server = response.Service
-				// 匿名登录
-				addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
-				if blasting.NewConnFTP(addr, "anonymous", "", b.BlastingCmdArgs.Timeout) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = "anonymous"
-					result.Password = ""
-					resultCh <- *result
-					continue
-				}
-				if blasting.NewConnFTP(addr, response.Username, response.Password, b.BlastingCmdArgs.Timeout) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = response.Username
-					result.Password = response.Password
-					resultCh <- *result
+				if result.Username == "" && result.Retry < b.BlastingCmdArgs.Retry {
+					result.Retry += 1
+					// 匿名登录
+					addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
+					if blasting.NewConnFTP(addr, "anonymous", "", b.BlastingCmdArgs.Timeout) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Username = "anonymous"
+						result.Password = ""
+						resultCh <- result
+					}
+					if blasting.NewConnFTP(addr, response.Username, response.Password, b.BlastingCmdArgs.Timeout) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Username = response.Username
+						result.Password = response.Password
+						resultCh <- result
+					}
 				}
 			}
 		case "mysql":
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
-				result.Retry += 1
-				result.Server = response.Service
-				dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/mysql", response.Username, response.Password, response.IP, response.Port)
-				if blasting.NewXormConnMysql(response.Service, dataSourceName) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = response.Username
-					result.Password = response.Password
-					resultCh <- *result
+				if result.Username == "" && result.Retry < b.BlastingCmdArgs.Retry {
+					result.Retry += 1
+					dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%s)/mysql", response.Username, response.Password, response.IP, response.Port)
+					if blasting.NewXormConnMysql(response.Service, dataSourceName) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Username = response.Username
+						result.Password = response.Password
+						resultCh <- result
+					}
 				}
 			}
 		case "redis":
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
-				result.Retry += 1
-				result.Server = response.Service
-				addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
-				if blasting.NewConnRedis(addr, "", "") {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = "Anonymous access!!"
-					result.Password = ""
-					resultCh <- *result
-					continue
-				}
-				if blasting.NewConnRedis(addr, response.Username, response.Password) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Password = response.Password
-					resultCh <- *result
+				if result.Password == "" && result.Retry < b.BlastingCmdArgs.Retry {
+					result.Retry += 1
+					addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
+					if blasting.NewConnRedis(addr, "") {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Password = " "
+						resultCh <- result
+					}
+					if blasting.NewConnRedis(addr, response.Password) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Password = response.Password
+						resultCh <- result
+					}
 				}
 			}
 		case "postgres":
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
-				result.Retry += 1
-				result.Server = "postgresql"
-				dataSourceName := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=postgres sslmode=disable", response.IP, response.Port, response.Username, response.Password)
-				if blasting.NewConnPgSql(response.Service, dataSourceName) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = response.Username
-					result.Password = response.Password
-					resultCh <- *result
+				if result.Username == "" && result.Retry < b.BlastingCmdArgs.Retry {
+					result.Retry += 1
+					result.Server = "postgresql"
+					dataSourceName := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=postgres sslmode=disable", response.IP, response.Port, response.Username, response.Password)
+					if blasting.NewConnPgSql(response.Service, dataSourceName) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Username = response.Username
+						result.Password = response.Password
+						resultCh <- result
+					}
 				}
 			}
 		case "oracle":
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
-				result.Retry += 1
-				result.Server = response.Service
-				dataSourceName := fmt.Sprintf("%s/%s@%s:%s/ORCL", response.Username, response.Password, response.IP, response.Port)
-				if blasting.NewConnOracle("oci8", dataSourceName) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = response.Username
-					result.Password = response.Password
-					resultCh <- *result
+				if result.Username == "" && result.Retry < b.BlastingCmdArgs.Retry {
+					result.Retry += 1
+					dataSourceName := fmt.Sprintf("%s/%s@%s:%s/ORCL", response.Username, response.Password, response.IP, response.Port)
+					if blasting.NewConnOracle("oci8", dataSourceName) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Username = response.Username
+						result.Password = response.Password
+						resultCh <- result
+					}
 				}
 			}
 		case "http_basic":
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
-				result.Retry += 1
-				result.Server = response.Service
-				addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
-				if blasting.NewConnHttpBasic(addr, response.Username, response.Password, b.BlastingCmdArgs.Path, b.BlastingCmdArgs.Timeout) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = response.Username
-					result.Password = response.Password
-					resultCh <- *result
+				if result.Username == "" && result.Retry < b.BlastingCmdArgs.Retry {
+					result.Retry += 1
+					addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
+					if blasting.NewConnHttpBasic(addr, response.Username, response.Password, b.BlastingCmdArgs.Path, b.BlastingCmdArgs.Timeout) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Username = response.Username
+						result.Password = response.Password
+						resultCh <- result
+					}
 				}
 			}
 		case "tomcat":
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
-				result.Retry += 1
-				result.Server = response.Service
-				addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
-				if blasting.NewConnTomcat(addr, response.Username, response.Password, b.BlastingCmdArgs.TomcatPath, b.BlastingCmdArgs.Timeout) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = response.Username
-					result.Password = response.Password
-					resultCh <- *result
+				if result.Username == "" && result.Retry < b.BlastingCmdArgs.Retry {
+					result.Retry += 1
+					addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
+					if blasting.NewConnTomcat(addr, response.Username, response.Password, b.BlastingCmdArgs.TomcatPath, b.BlastingCmdArgs.Timeout) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Username = response.Username
+						result.Password = response.Password
+						resultCh <- result
+					}
 				}
 			}
 		case "telnet":
 			for i := 0; i < b.BlastingCmdArgs.Retry; i++ {
-				result.Retry += 1
-				result.Server = response.Service
-				addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
-				if blasting.NewConnTelnet(addr, response.Username, response.Password, b.BlastingCmdArgs.Timeout) {
-					result.IP = response.IP
-					result.Port = response.Port
-					result.Username = response.Username
-					result.Password = response.Password
-					resultCh <- *result
+				if result.Username == "" && result.Retry < b.BlastingCmdArgs.Retry {
+					result.Retry += 1
+					addr := fmt.Sprintf("%s:%s", response.IP, response.Port)
+					if blasting.NewConnTelnet(addr, response.Username, response.Password, b.BlastingCmdArgs.Timeout) {
+						result.IP = response.IP
+						result.Port = response.Port
+						result.Username = response.Username
+						result.Password = response.Password
+						resultCh <- result
+					}
 				}
 			}
 		}

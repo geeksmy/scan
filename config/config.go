@@ -15,8 +15,8 @@ type Config struct {
 	Redis             redis.Conf           `yaml:"redis,omitempty"`
 	Database          DatabaseConfig       `yaml:"database,omitempty"`
 	Port              PortConfig           `yaml:"port,omitempty"`
-	Blasting          BlastingConfig       `yaml:"blasting,omitempty"`
-	WebFingerprint    WebFingerprintConfig `yaml:"web-fingerprint,omitempty"`
+	Blasting          BlastingConfig       `yaml:"brute,omitempty"`
+	WebFingerprint    WebFingerprintConfig `yaml:"web,omitempty"`
 	Cyberspace        Cyberspace           `yaml:"cyberspace,omitempty"`
 }
 

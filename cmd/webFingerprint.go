@@ -44,13 +44,13 @@ func webFingerprintCmd() *cobra.Command {
 		},
 	}
 
-	webFingerprintCmd.PersistentFlags().StringP("target-urls", "u", "", "目标 url 文件")
+	webFingerprintCmd.PersistentFlags().StringP("target-urls", "u", "", "目标IP列表文件")
 	webFingerprintCmd.PersistentFlags().Int("thread", 0, "线程")
-	webFingerprintCmd.PersistentFlags().Int("timeout", 0, "超时时间")
-	webFingerprintCmd.PersistentFlags().Int("retry", 0, "重试次数 必须>=1")
+	webFingerprintCmd.PersistentFlags().Int("timeout", 0, "超时")
+	webFingerprintCmd.PersistentFlags().Int("retry", 0, "重试次数")
 	webFingerprintCmd.PersistentFlags().StringP("out-file", "o", "", "输出文件 web-fingerprint.txt")
-	webFingerprintCmd.PersistentFlags().StringArrayP("target-ports", "p", []string{}, `需要扫描的端口列表 ["80", "443"]`)
-	webFingerprintCmd.PersistentFlags().StringP("fingerprint-file", "f", "", "规则或者指纹文件")
+	webFingerprintCmd.PersistentFlags().StringArrayP("target-ports", "p", []string{}, "要扫描的Web服务端口列表 80,443")
+	webFingerprintCmd.PersistentFlags().StringP("fingerprint-file", "f", "", "Web指纹文件")
 
 	return webFingerprintCmd
 }

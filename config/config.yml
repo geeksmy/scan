@@ -38,7 +38,7 @@ port:
   thread: 20
   retry: 3
 
-blasting:
+brute:
   target-host: "target.txt"
   user-file: "user.txt"
   pass-file: "pass.txt"
@@ -60,7 +60,7 @@ blasting:
   path: "/login"
   tomcat-path: "/manager"
 
-web-fingerprint:
+web:
   target-urls: "urls.txt"
   target-ports:
     - 80

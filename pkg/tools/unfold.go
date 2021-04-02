@@ -95,7 +95,7 @@ func IncludePort(targetPort string, ports string) bool {
 }
 
 func String2strings(s string) []string {
-	s = s[1 : len(s)-1]
+	// s = s[1 : len(s)-1]
 	return strings.Split(s, ",")
 }
 
@@ -104,10 +104,26 @@ func GetFile2Strings(targetFile string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	ips := strings.Split(string(fileData), "\n")
+	strS := strings.Split(string(fileData), "\n")
 	if strings.Contains(string(fileData), "\r\n") {
-		ips = strings.Split(string(fileData), "\r\n")
+		strS = strings.Split(string(fileData), "\r\n")
 	}
 
-	return ips, nil
+	s := removeDuplicatesAndEmpty(strS)
+
+	return s, nil
+}
+
+/**
+ * 数组去重 去空
+ */
+func removeDuplicatesAndEmpty(a []string) (ret []string) {
+	aLen := len(a)
+	for i := 0; i < aLen; i++ {
+		if (i > 0 && a[i-1] == a[i]) || len(a[i]) == 0 {
+			continue
+		}
+		ret = append(ret, a[i])
+	}
+	return
 }

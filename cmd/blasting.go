@@ -47,17 +47,17 @@ func blastingCmd() *cobra.Command {
 	blastingCmd.PersistentFlags().StringP("target-host", "i", "", "目标文件")
 	blastingCmd.PersistentFlags().StringP("user-file", "u", "", "用户名字典")
 	blastingCmd.PersistentFlags().StringP("pass-file", "p", "", "密码字典")
-	blastingCmd.PersistentFlags().String("port", "", "默认端口")
+	blastingCmd.PersistentFlags().String("port", "", "服务端口(如目标用的非默认端口,则需自行手工指定)")
 	blastingCmd.PersistentFlags().Int("delay", 0, "延迟")
 	blastingCmd.PersistentFlags().Int("thread", 0, "线程")
-	blastingCmd.PersistentFlags().Int("timeout", 0, "超时时间")
-	blastingCmd.PersistentFlags().Int("retry", 0, "重试次数 必须>=1")
-	blastingCmd.PersistentFlags().Bool("scan-port", false, "爆破前是否执行端口扫描")
+	blastingCmd.PersistentFlags().Int("timeout", 0, "超时")
+	blastingCmd.PersistentFlags().Int("retry", 0, "重试次数")
+	blastingCmd.PersistentFlags().Bool("scan-port", false, "爆破前是否进行端口扫描")
 	blastingCmd.PersistentFlags().StringArrayP("services", "s", []string{},
-		`需要爆破的服务 ["ssh", "ftp", "mssql", "mysql", "redis", "postgresql", "http_basic", "tomcat", "telnet"]`)
-	blastingCmd.PersistentFlags().String("path", "", `http_basic路径 "/login"`)
+		`指定要爆破的服务 "ssh","ftp","mssql","mysql","redis","postgresql","http_basic","tomcat","telnet"`)
+	blastingCmd.PersistentFlags().String("path", "", `http_basic 路径 "/login"`)
 	blastingCmd.PersistentFlags().String("tomcat-path", "", `tomcat路径 "/manager"`)
-	blastingCmd.PersistentFlags().StringP("out-file", "o", "", "输出文件 blasting.txt")
+	blastingCmd.PersistentFlags().StringP("out-file", "o", "", "输出文件,blasting.txt")
 
 	return blastingCmd
 }

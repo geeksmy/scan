@@ -74,7 +74,7 @@ func init() {
 	RootCmd.AddCommand(portCmd())
 	RootCmd.AddCommand(blastingCmd())
 	RootCmd.AddCommand(webFingerprintCmd())
-	RootCmd.AddCommand(cyberspaceCmd())
+	// RootCmd.AddCommand(cyberspaceCmd())
 	// rootCmd.AddCommand(poolCmd())
 	// rootCmd.AddCommand(dirCmd())
 	// rootCmd.AddCommand(dnsCmd())

@@ -169,6 +169,10 @@ func (svc *WebFingerPrint) InitCmdArgs(cmd *cobra.Command) (*WebFingerPrintCmdAr
 		svc.Args.Thread = thread
 	}
 
+	if svc.Args.Thread <= 1 {
+		svc.Args.Thread = 1
+	}
+
 	retry, _ := cmd.Flags().GetInt("retry")
 	switch retry {
 	case 0:
@@ -177,12 +181,20 @@ func (svc *WebFingerPrint) InitCmdArgs(cmd *cobra.Command) (*WebFingerPrintCmdAr
 		svc.Args.Retry = retry
 	}
 
+	if svc.Args.Retry <= 1 {
+		svc.Args.Retry = 1
+	}
+
 	timeout, _ := cmd.Flags().GetInt("timeout")
 	switch timeout {
 	case 0:
 		svc.Args.Timeout = conf.WebFingerprint.Timeout
 	default:
 		svc.Args.Timeout = timeout
+	}
+
+	if svc.Args.Timeout <= 1 {
+		svc.Args.Timeout = 1
 	}
 
 	fileName, _ := cmd.Flags().GetString("fingerprint-file")
@@ -201,6 +213,7 @@ func (svc *WebFingerPrint) InitCmdArgs(cmd *cobra.Command) (*WebFingerPrintCmdAr
 		svc.Args.OutPut = "file"
 		svc.Args.OutFileName = outFile
 	}
+
 	return &svc.Args, nil
 }
 
@@ -277,6 +290,10 @@ func sendRequestWork(urls <-chan string, responses chan<- WebFingerPrintResponse
 			if title != nil {
 				if title[0] != nil {
 					response.Title = title[0][1]
+					if len(title[0][1]) > 45 {
+						s := title[0][1][:40] + "..."
+						response.Title = s
+					}
 				}
 			}
 		}
