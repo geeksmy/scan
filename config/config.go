@@ -17,7 +17,7 @@ type Config struct {
 	Port              PortConfig           `yaml:"port,omitempty"`
 	Blasting          BlastingConfig       `yaml:"brute,omitempty"`
 	WebFingerprint    WebFingerprintConfig `yaml:"web,omitempty"`
-	Cyberspace        Cyberspace           `yaml:"cyberspace,omitempty"`
+	Cyberspace        CyberspaceConfig     `yaml:"cyberspace,omitempty"`
 }
 
 type DatabaseConfig struct {
@@ -39,42 +39,56 @@ type LoggerConfig struct {
 }
 
 type PortConfig struct {
-	Protocol        string   `yaml:"protocol,omitempty"`
-	FingerprintFile string   `yaml:"fingerprint-file,omitempty"`
+	Protocol        string   `yaml:"protocol,omitempty" default:"tcp"`
+	FingerprintFile string   `yaml:"fingerprint-file,omitempty" default:"nmap-service-probes"`
 	TargetIPs       []string `yaml:"target-ips,omitempty"`
-	TargetFile      string   `yaml:"target-file,omitempty" default:""`
+	TargetFile      string   `yaml:"target-file,omitempty"`
 	TargetPorts     []string `yaml:"target-ports,omitempty"`
-	Timeout         int      `yaml:"timeout,omitempty"`
-	Thread          int      `yaml:"thread,omitempty"`
-	Retry           int      `yaml:"retry,omitempty"`
+	Timeout         int      `yaml:"timeout,omitempty" default:"1"`
+	Thread          int      `yaml:"thread,omitempty" default:"20"`
+	Retry           int      `yaml:"retry,omitempty" default:"1"`
 }
 
 type BlastingConfig struct {
 	TargetHost string   `yaml:"target-host,omitempty"`
 	UserFile   string   `yaml:"user-file,omitempty"`
 	PassFile   string   `yaml:"pass-file,omitempty"`
-	Delay      int      `yaml:"delay,omitempty"`
-	Thread     int      `yaml:"thread,omitempty"`
-	Timeout    int      `yaml:"timeout,omitempty"`
-	Retry      int      `yaml:"retry,omitempty"`
+	Delay      int      `yaml:"delay,omitempty" default:"1"`
+	Thread     int      `yaml:"thread,omitempty" default:"20"`
+	Timeout    int      `yaml:"timeout,omitempty" default:"1"`
+	Retry      int      `yaml:"retry,omitempty" default:"1"`
 	ScanPort   bool     `yaml:"scan-port,omitempty"`
 	Services   []string `yaml:"services,omitempty"`
-	Path       string   `yaml:"path,omitempty"`
-	TomcatPath string   `yaml:"tomcat-path,omitempty"`
+	Path       string   `yaml:"path,omitempty" default:"/login"`
+	TomcatPath string   `yaml:"tomcat-path,omitempty" default:"/manager"`
 }
 
 type WebFingerprintConfig struct {
 	TargetUrls      string   `yaml:"target-urls,omitempty"`
 	TargetPorts     []string `yaml:"target-ports,omitempty"`
 	FingerprintName string   `yaml:"fingerprint-name,omitempty"`
-	Thread          int      `yaml:"thread,omitempty"`
-	Timeout         int      `yaml:"timeout,omitempty"`
-	Retry           int      `yaml:"retry,omitempty"`
+	Thread          int      `yaml:"thread,omitempty" default:"20"`
+	Timeout         int      `yaml:"timeout,omitempty" default:"1"`
+	Retry           int      `yaml:"retry,omitempty" default:"1"`
 }
 
-type Cyberspace struct {
-	Engine  string `yaml:"engine,omitempty"`
-	Keyword string `yaml:"keyword,omitempty"`
+type Fofa struct {
+	Email         string `yaml:"email,omitempty"`
+	Key           string `yaml:"key,omitempty"`
+	Authorization string `yaml:"authorization,omitempty"`
+}
+
+type Shodan struct {
+	Key string `yaml:"key,omitempty"`
+}
+
+type CyberspaceConfig struct {
+	Engine  string `yaml:"engine,omitempty" default:"fofa"`
+	Timeout int    `yaml:"timeout,omitempty" default:"1"`
+	Thread  int    `yaml:"thread,omitempty" default:"20"`
+	Search  string `yaml:"search,omitempty"`
+	Fofa    Fofa   `yaml:"fofa,omitempty"`
+	Shodan  Shodan `yaml:"shodan,omitempty"`
 }
 
 func InitLogger(debug, disableStacktrace bool, level, output string) {

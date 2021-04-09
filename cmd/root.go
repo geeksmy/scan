@@ -32,41 +32,8 @@ var RootCmd = &cobra.Command{
 	},
 }
 
-// Execute is the main cobra method
-// func Execute() {
-// 	var cancel context.CancelFunc
-// 	mainContext, cancel := context.WithCancel(context.Background())
-// 	defer cancel()
-//
-// 	signalChan := make(chan os.Signal, 1)
-// 	signal.Notify(signalChan, os.Interrupt)
-// 	defer func() {
-// 		signal.Stop(signalChan)
-// 		cancel()
-// 	}()
-// 	go func() {
-// 		select {
-// 		case <-signalChan:
-// 			// caught CTRL+C
-// 			fmt.Println("\n[!] 检测到键盘中断，正在终止。")
-// 			cancel()
-// 		case <-mainContext.Done():
-// 		}
-// 	}()
-//
-// 	if err := rootCmd.Execute(); err != nil {
-// 		// Leaving this in results in the same error appearing twice
-// 		// Once before and once after the help output. Not sure if
-// 		// this is going to be needed to output other errors that
-// 		// aren't automatically outputted.
-// 		// fmt.Println(err)
-// 		os.Exit(1)
-// 	}
-// }
-
 func init() {
 	// 全局配置
-	// rootCmd.PersistentFlags().StringP("url", "u", "", "需要扫描的ip或url")
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "配置文件路径")
 
 	// 新增命令
@@ -75,6 +42,7 @@ func init() {
 	RootCmd.AddCommand(blastingCmd())
 	RootCmd.AddCommand(webFingerprintCmd())
 	// RootCmd.AddCommand(cyberspaceCmd())
+	RootCmd.SetHelpCommand(helpCmd())
 	// rootCmd.AddCommand(poolCmd())
 	// rootCmd.AddCommand(dirCmd())
 	// rootCmd.AddCommand(dnsCmd())

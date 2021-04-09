@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"scan/internal/model"
 	"scan/internal/service"
 
 	"github.com/spf13/cobra"
@@ -40,7 +41,7 @@ func (w *WebFingerprint) WebFingerprintMain() error {
 
 	var mainWG sync.WaitGroup
 	responses := make(chan service.WebFingerPrintResponse, len(*args.TargetIPs)*len(*args.TargetPorts))
-	results := make(chan service.WebFingerPrintResult, len(*args.TargetIPs)*len(*args.TargetPorts))
+	results := make(chan model.Web, len(*args.TargetIPs)*len(*args.TargetPorts))
 
 	mainWG.Add(1)
 	go svc.SendRequest(responses, &mainWG)

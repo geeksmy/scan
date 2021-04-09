@@ -34,18 +34,11 @@ port:
     - "5980"
     - "80-90"
     - "8080-8090"
-  timeout: 5
-  thread: 20
-  retry: 3
 
 brute:
   target-host: "target.txt"
   user-file: "user.txt"
   pass-file: "pass.txt"
-  delay: 0
-  thread: 100
-  timeout: 0
-  retry: 0
   scan-port: false
   services:
     - "ssh"
@@ -66,10 +59,13 @@ web:
     - 80
     - 443
   fingerprint-name: "fingerprint/finger.json"
-  thread: 100
-  timeout: 0
-  retry: 0
 
 cyberspace:
   engine: "fofa"
-  keyword: '"邮件"||"mail"'
+  search: ""
+  fofa:
+    authorization: ""
+    email: ""
+    key: ""
+  shodan:
+    key: ""

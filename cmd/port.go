@@ -34,7 +34,7 @@ func portCmd() *cobra.Command {
 			p := cli.NewPort(cmd, zap.L())
 			if err := p.PortMain(); err != nil {
 				_ = cmd.Help()
-				return nil
+				return err
 			}
 			return nil
 		},

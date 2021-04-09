@@ -127,3 +127,13 @@ func removeDuplicatesAndEmpty(a []string) (ret []string) {
 	}
 	return
 }
+
+// 批量判断字符串是否包含
+func Contains(s string, substrs []string) bool {
+	for _, substr := range substrs {
+		if strings.Contains(strings.ToLower(s), strings.ToLower(substr)) {
+			return true
+		}
+	}
+	return false
+}

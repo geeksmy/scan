@@ -34,7 +34,7 @@ func blastingCmd() *cobra.Command {
 			p := cli.NewBlasting(cmd, zap.L())
 			if err := p.BlastingMain(); err != nil {
 				_ = cmd.Help()
-				return nil
+				return err
 			}
 			return nil
 		},

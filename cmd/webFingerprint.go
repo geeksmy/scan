@@ -34,7 +34,7 @@ func webFingerprintCmd() *cobra.Command {
 			p := cli.NewWebFingerprint(cmd, zap.L())
 			if err := p.WebFingerprintMain(); err != nil {
 				_ = cmd.Help()
-				return nil
+				return err
 			}
 			return nil
 		},

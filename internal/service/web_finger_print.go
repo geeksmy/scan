@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"scan/config"
+	"scan/internal/model"
 	"scan/pkg/tools"
 
 	"github.com/axgle/mahonia"
@@ -44,21 +45,12 @@ type WebFingerPrintSVC interface {
 	 * @param results 指纹识别后返回值管道
 	 * @param mainWG 计数器
 	 */
-	IdentifyResponse(responses chan WebFingerPrintResponse, results chan WebFingerPrintResult, mainWG *sync.WaitGroup)
+	IdentifyResponse(responses chan WebFingerPrintResponse, results chan model.Web, mainWG *sync.WaitGroup)
 	/**
 	 * OutputPrinting 输出打印
 	 * @param results 指纹识别后返回值管道
 	 */
-	OutputPrinting(results chan WebFingerPrintResult)
-}
-
-type WebFingerPrintResult struct {
-	Url         string
-	StateCode   int
-	Server      string
-	Title       string
-	FingerPrint string
-	Retry       int
+	OutputPrinting(results chan model.Web)
 }
 
 type WebFingerPrintResponse struct {
@@ -169,10 +161,6 @@ func (svc *WebFingerPrint) InitCmdArgs(cmd *cobra.Command) (*WebFingerPrintCmdAr
 		svc.Args.Thread = thread
 	}
 
-	if svc.Args.Thread <= 1 {
-		svc.Args.Thread = 1
-	}
-
 	retry, _ := cmd.Flags().GetInt("retry")
 	switch retry {
 	case 0:
@@ -181,20 +169,12 @@ func (svc *WebFingerPrint) InitCmdArgs(cmd *cobra.Command) (*WebFingerPrintCmdAr
 		svc.Args.Retry = retry
 	}
 
-	if svc.Args.Retry <= 1 {
-		svc.Args.Retry = 1
-	}
-
 	timeout, _ := cmd.Flags().GetInt("timeout")
 	switch timeout {
 	case 0:
 		svc.Args.Timeout = conf.WebFingerprint.Timeout
 	default:
 		svc.Args.Timeout = timeout
-	}
-
-	if svc.Args.Timeout <= 1 {
-		svc.Args.Timeout = 1
 	}
 
 	fileName, _ := cmd.Flags().GetString("fingerprint-file")
@@ -368,10 +348,10 @@ func (svc *WebFingerPrint) SendRequest(responses chan WebFingerPrintResponse, ma
 	close(urls)
 }
 
-func identifyResponseWork(responses <-chan WebFingerPrintResponse, results chan<- WebFingerPrintResult, wg *sync.WaitGroup,
+func identifyResponseWork(responses <-chan WebFingerPrintResponse, results chan<- model.Web, wg *sync.WaitGroup,
 	keyword, faviconHash []WebFingerPrintArgs, retry int) {
 	for response := range responses {
-		result := WebFingerPrintResult{
+		result := model.Web{
 			Url:       response.Url,
 			StateCode: response.StateCode,
 			Server:    response.Server,
@@ -428,7 +408,7 @@ func identifyResponseWork(responses <-chan WebFingerPrintResponse, results chan<
 
 }
 
-func (svc *WebFingerPrint) IdentifyResponse(responses chan WebFingerPrintResponse, results chan WebFingerPrintResult, mainWG *sync.WaitGroup) {
+func (svc *WebFingerPrint) IdentifyResponse(responses chan WebFingerPrintResponse, results chan model.Web, mainWG *sync.WaitGroup) {
 	defer mainWG.Done()
 	defer close(results)
 
@@ -448,7 +428,7 @@ func (svc *WebFingerPrint) IdentifyResponse(responses chan WebFingerPrintRespons
 	close(res)
 }
 
-func (svc *WebFingerPrint) OutputPrinting(results chan WebFingerPrintResult) {
+func (svc *WebFingerPrint) OutputPrinting(results chan model.Web) {
 
 	_, err := os.Stat(svc.Args.OutFileName)
 	if err == nil {
