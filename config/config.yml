@@ -69,3 +69,9 @@ cyberspace:
     key: ""
   shodan:
     key: ""
+
+passgen:
+  year: ""
+  domain-name: ""
+  domain: ""
+  device: ""

@@ -18,6 +18,7 @@ type Config struct {
 	Blasting          BlastingConfig       `yaml:"brute,omitempty"`
 	WebFingerprint    WebFingerprintConfig `yaml:"web,omitempty"`
 	Cyberspace        CyberspaceConfig     `yaml:"cyberspace,omitempty"`
+	PassGen           PassGenConfig        `yaml:"passgen,omitempty"`
 }
 
 type DatabaseConfig struct {
@@ -89,6 +90,15 @@ type CyberspaceConfig struct {
 	Search  string `yaml:"search,omitempty"`
 	Fofa    Fofa   `yaml:"fofa,omitempty"`
 	Shodan  Shodan `yaml:"shodan,omitempty"`
+}
+
+type PassGenConfig struct {
+	Year       string `yaml:"year,omitempty"`
+	DomainName string `yaml:"domain-name,omitempty"`
+	Domain     string `yaml:"domain,omitempty"`
+	Device     string `yaml:"device,omitempty"`
+	Length     int    `yaml:"length,omitempty" default:"1"`
+	OutFile    string `yaml:"out-file,omitempty" default:"pass.txt"`
 }
 
 func InitLogger(debug, disableStacktrace bool, level, output string) {
