@@ -16,7 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"github.com/geeksmy/cobra"
 )
 
 var (
@@ -42,9 +42,11 @@ func init() {
 	RootCmd.AddCommand(blastingCmd())
 	RootCmd.AddCommand(webFingerprintCmd())
 	RootCmd.AddCommand(passgenCmd())
+	RootCmd.AddCommand(intranetAliveCmd())
 	// RootCmd.AddCommand(cyberspaceCmd())
-	RootCmd.SetHelpCommand(helpCmd())
+	// RootCmd.SetHelpCommand(helpCmd())
 	// rootCmd.AddCommand(poolCmd())
 	// rootCmd.AddCommand(dirCmd())
 	// rootCmd.AddCommand(dnsCmd())
+	RootCmd.CompletionOptions.DisableDefaultCmd = true
 }

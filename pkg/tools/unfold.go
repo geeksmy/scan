@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"net"
@@ -114,9 +115,7 @@ func GetFile2Strings(targetFile string) ([]string, error) {
 	return s, nil
 }
 
-/**
- * 数组去重 去空
- */
+// 数组去重 去空
 func removeDuplicatesAndEmpty(a []string) (ret []string) {
 	aLen := len(a)
 	for i := 0; i < aLen; i++ {
@@ -128,12 +127,28 @@ func removeDuplicatesAndEmpty(a []string) (ret []string) {
 	return
 }
 
-// 批量判断字符串是否包含
-func Contains(s string, substrs []string) bool {
-	for _, substr := range substrs {
-		if strings.Contains(strings.ToLower(s), strings.ToLower(substr)) {
-			return true
+// 生成内网网段
+func GenerateIntranet(s []string, d []string) []string {
+	var ips []string
+	for i := 0; i < len(s); i++ {
+		x := strings.Split(s[i], ".")
+		switch len(x) {
+		case 2:
+			for z := 1; z < 256; z++ {
+				for c := 1; c < 256; c++ {
+					for v := 0; v < len(d); v++ {
+						ips = append(ips, fmt.Sprintf("%s.%d.%d.%s", x[0], z, c, d[v]))
+					}
+				}
+			}
+		case 3:
+			for z := 1; z < 256; z++ {
+				for c := 0; c < len(d); c++ {
+					ips = append(ips, fmt.Sprintf("%s.%s.%d.%s", x[0], x[1], z, d[c]))
+				}
+			}
 		}
 	}
-	return false
+
+	return ips
 }

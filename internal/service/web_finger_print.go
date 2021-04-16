@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -15,7 +16,7 @@ import (
 	"scan/pkg/tools"
 
 	"github.com/axgle/mahonia"
-	"github.com/spf13/cobra"
+	"github.com/geeksmy/cobra"
 	"go.uber.org/zap"
 )
 
@@ -430,6 +431,8 @@ func (svc *WebFingerPrint) IdentifyResponse(responses chan WebFingerPrintRespons
 
 func (svc *WebFingerPrint) OutputPrinting(results chan model.Web) {
 
+	var id int
+
 	_, err := os.Stat(svc.Args.OutFileName)
 	if err == nil {
 		// 如果文件存在
@@ -440,16 +443,18 @@ func (svc *WebFingerPrint) OutputPrinting(results chan model.Web) {
 
 	switch svc.Args.OutPut {
 	case "file":
-		_, _ = file.WriteString(fmt.Sprintf("%-30s%-30.25s%-15s%-20s%-50s\n", "url", "server", "state_code", "fingerprint", "title"))
-		fmt.Printf("%-30s%-30.25s%-15s%-20s%-50s\n", "url", "server", "state_code", "fingerprint", "title")
+		_, _ = file.WriteString(fmt.Sprintf("%-5s%-30s%-30.25s%-15s%-20s%-50s\n", "id", "url", "server", "state_code", "fingerprint", "title"))
+		fmt.Printf("%-5s%-30s%-30.25s%-15s%-20s%-50s\n", "id", "url", "server", "state_code", "fingerprint", "title")
 		for result := range results {
-			fmt.Printf("%-30s%-30.25s%-3d%-12s%-20s%-50s\n", result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title)
-			_, _ = file.WriteString(fmt.Sprintf("%-30s%-30.25s%-3d%-12s%-20s%-50.45s\n", result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title))
+			id += 1
+			fmt.Printf("%-5s%-30s%-30.25s%-3d%-12s%-20s%-50s\n", strconv.Itoa(id), result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title)
+			_, _ = file.WriteString(fmt.Sprintf("%-5s%-30s%-30.25s%-3d%-12s%-20s%-50.45s\n", strconv.Itoa(id), result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title))
 		}
 	default:
-		fmt.Printf("%-30s%-30.25s%-15s%-20s%-50s\n", "url", "server", "state_code", "fingerprint", "title")
+		fmt.Printf("%-5s%-30s%-30.25s%-15s%-20s%-50s\n", "id", "url", "server", "state_code", "fingerprint", "title")
 		for result := range results {
-			fmt.Printf("%-30s%-30.25s%-3d%-12s%-20s%-50s\n", result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title)
+			id += 1
+			fmt.Printf("%-5s%-30s%-30.25s%-3d%-12s%-20s%-50s\n", strconv.Itoa(id), result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title)
 		}
 	}
 }

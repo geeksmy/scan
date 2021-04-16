@@ -6,11 +6,10 @@ require (
 	github.com/3th1nk/cidr v0.0.0-20200222033026-ac57bd3ad921
 	github.com/EDDYCJY/fake-useragent v0.2.0
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/geeksmy/cobra v1.1.4
 	github.com/geeksmy/go-libs v0.0.0-20210119081920-06d5b69154f4
 	github.com/gijsbers/go-pcre v0.0.0-20161214203829-a84f3096ab3c
 	github.com/go-redis/redis/v7 v7.4.0
-	github.com/go-resty/resty/v2 v2.5.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/uuid v1.1.4
@@ -26,23 +25,14 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/reiver/go-oi v1.0.0 // indirect
 	github.com/spf13/afero v1.5.1 // indirect
-	github.com/spf13/cast v1.3.1 // indirect
-	github.com/spf13/cobra v1.1.3
-	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/viper v1.7.1 // indirect
-	github.com/tebeka/selenium v0.9.9
 	github.com/twmb/murmur3 v1.1.5
-	github.com/vbauerster/mpb/v6 v6.0.2 // indirect
 	go.uber.org/zap v1.16.0
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
 	golang.org/x/sys v0.0.0-20210326220804-49726bf1d181 // indirect
 	golang.org/x/text v0.3.5 // indirect
-	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	xorm.io/xorm v1.0.7
 )

@@ -5,6 +5,7 @@ import (
 	"net"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -13,7 +14,7 @@ import (
 	"scan/internal/model"
 	"scan/pkg/tools"
 
-	"github.com/spf13/cobra"
+	"github.com/geeksmy/cobra"
 	"go.uber.org/zap"
 )
 
@@ -606,7 +607,10 @@ func chanRemoveSliceMap(res Result, hashMap *sync.Map) {
 func (svc *Port) OutputPrinting(resultCh <-chan Result) {
 	var (
 		hashMap sync.Map
+		id      int
 	)
+
+	fmt.Printf("%-5s%-20s%-10s%-20s%-50.45s%-5s\n", "ID", "IP", "Port", "Server", "Server Info", "retry")
 
 	// 去重
 	for res := range resultCh {
@@ -624,17 +628,17 @@ func (svc *Port) OutputPrinting(resultCh <-chan Result) {
 	switch svc.CmdArgs.OutPut {
 	case "file":
 		_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-50.45s%-100.95s\n", "IP", "Port", "Server", "Server Info", "Banner"))
-		fmt.Printf("%-20s%-10s%-20s%-50.45s%-5s\n", "IP", "Port", "Server", "Server Info", "retry")
 		hashMap.Range(func(key, value interface{}) bool {
-			fmt.Printf("%-20s%-10s%-20s%-50.45s%-1d\n", value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version, value.(Result).Retry)
-			_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-50.45s\n", value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version))
+			id += 1
+			fmt.Printf("%-5s%-20s%-10s%-20s%-50.45s%-1d\n", strconv.Itoa(id), value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version, value.(Result).Retry)
+			_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s%-10s%-20s%-50.45s\n", strconv.Itoa(id), value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version))
 			return true
 		})
 
 	default:
-		fmt.Printf("%-20s%-10s%-20s%-50.45s%-5s\n", "IP", "Port", "Server", "Server Info", "retry")
 		hashMap.Range(func(key, value interface{}) bool {
-			fmt.Printf("%-20s%-10s%-20s%-50.45s%-1d\n", value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version, value.(Result).Retry)
+			id += 1
+			fmt.Printf("%-5s%-20s%-10s%-20s%-50.45s%-1d\n", strconv.Itoa(id), value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version, value.(Result).Retry)
 			return true
 		})
 	}

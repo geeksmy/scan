@@ -16,10 +16,12 @@ limitations under the License.
 package cmd
 
 import (
+	"os"
+
 	"scan/config"
 	"scan/controller/cli"
 
-	"github.com/spf13/cobra"
+	"github.com/geeksmy/cobra"
 	"go.uber.org/zap"
 )
 
@@ -28,12 +30,14 @@ func portCmd() *cobra.Command {
 	portCmd := &cobra.Command{
 		Use:   "port",
 		Short: "端口扫描",
-		Long:  "注,命令行参数权重大于配置文件参数, --target-file 参数权重大于--target-ips",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// tools.Banner()
+			// tools.Banner
+			if len(os.Args) == 2 {
+				_ = cmd.Help()
+				return nil
+			}
 			p := cli.NewPort(cmd, zap.L())
 			if err := p.PortMain(); err != nil {
-				// _ = cmd.Help()
 				return err
 			}
 			return nil
@@ -45,15 +49,15 @@ func portCmd() *cobra.Command {
 		},
 	}
 
-	portCmd.PersistentFlags().String("protocol", "", "指定协议[tcp/udp]")
+	portCmd.PersistentFlags().StringP("protocol", "x", "", "指定协议[tcp/udp]")
 	portCmd.PersistentFlags().StringArrayP("target-ips", "i", []string{}, `目标IP列表 "192.168.1.100,192.168.2.0/24"`)
 	portCmd.PersistentFlags().StringArrayP("target-ports", "p", []string{}, "要扫描的服务端口列表 22,23")
-	portCmd.PersistentFlags().Int("timeout", 0, "超时")
-	portCmd.PersistentFlags().Int("thread", 0, "线程")
-	portCmd.PersistentFlags().Int("retry", 0, "重试次数")
+	portCmd.PersistentFlags().IntP("timeout", "m", 0, "超时,默认1")
+	portCmd.PersistentFlags().IntP("thread", "t", 0, "线程,默认20")
+	portCmd.PersistentFlags().IntP("retry", "r", 0, "重试次数,默认1")
 	portCmd.PersistentFlags().StringP("fingerprint-file", "f", "", "服务指纹库文件( 默认内置 nmap 指纹)")
 	portCmd.PersistentFlags().StringP("out-file", "o", "", "将结果输出到指定文件,默认,port.txt")
-	portCmd.PersistentFlags().String("target-file", "", "目标IP列表文件 target.txt")
+	portCmd.PersistentFlags().StringP("target-file", "b", "", "目标IP列表文件 target.txt")
 
 	return portCmd
 }

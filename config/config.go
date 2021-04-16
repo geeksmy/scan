@@ -19,6 +19,7 @@ type Config struct {
 	WebFingerprint    WebFingerprintConfig `yaml:"web,omitempty"`
 	Cyberspace        CyberspaceConfig     `yaml:"cyberspace,omitempty"`
 	PassGen           PassGenConfig        `yaml:"passgen,omitempty"`
+	IntranetAlive     IntranetAliveConfig  `yaml:"intranet-alive,omitempty"`
 }
 
 type DatabaseConfig struct {
@@ -99,6 +100,14 @@ type PassGenConfig struct {
 	Device     string `yaml:"device,omitempty"`
 	Length     int    `yaml:"length,omitempty" default:"1"`
 	OutFile    string `yaml:"out-file,omitempty" default:"pass.txt"`
+}
+
+type IntranetAliveConfig struct {
+	Target  string  `yaml:"target,omitempty"`
+	Thread  int     `yaml:"thread,omitempty" default:"20"`
+	Timeout int     `yaml:"timeout,omitempty" default:"1"`
+	Retry   int     `yaml:"retry,omitempty" default:"1"`
+	Delay   float32 `yaml:"delay,omitempty"`
 }
 
 func InitLogger(debug, disableStacktrace bool, level, output string) {

@@ -16,10 +16,12 @@ limitations under the License.
 package cmd
 
 import (
+	"os"
+
 	"scan/config"
 	"scan/controller/cli"
 
-	"github.com/spf13/cobra"
+	"github.com/geeksmy/cobra"
 	"go.uber.org/zap"
 )
 
@@ -27,8 +29,12 @@ import (
 func passgenCmd() *cobra.Command {
 	passgenCmd := &cobra.Command{
 		Use:   "passgen",
-		Short: "密码生成",
+		Short: "字典生成",
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(os.Args) == 2 {
+				_ = cmd.Help()
+				return nil
+			}
 			p := cli.NewPassGen(cmd, zap.L())
 			if err := p.PassGenMain(); err != nil {
 				return err
@@ -41,9 +47,9 @@ func passgenCmd() *cobra.Command {
 	}
 
 	passgenCmd.PersistentFlags().StringP("year", "y", "", "年份(可以同时有多个,以逗号隔开,如,2019,2020,2021)")
-	passgenCmd.PersistentFlags().String("domain-name", "", "目标域名简称,或者谐音变形(可以有多个,以逗号隔开,如,sangfor,sinfor)")
-	passgenCmd.PersistentFlags().String("domain", "", "完整域名 (如,www.baidu.com)")
-	passgenCmd.PersistentFlags().StringP("device", "d", "", "设备名(可以有多个,以逗号隔开,如,dell,hp)")
+	passgenCmd.PersistentFlags().StringP("domain-name", "j", "", "目标域名简称,或者谐音变形(可以有多个,以逗号隔开,如,coco,koko)")
+	passgenCmd.PersistentFlags().StringP("domain", "d", "", "完整域名 (如,www.xxx.com)")
+	passgenCmd.PersistentFlags().StringP("device", "s", "", "设备名(可以有多个,以逗号隔开,如,dell,hp)")
 	passgenCmd.PersistentFlags().IntP("length", "l", 0, "生成的密码在前中后分别包含几个特殊字符")
 	passgenCmd.PersistentFlags().StringP("out-file", "o", "", "将结果输出到指定文件,默认,pass.txt")
 	return passgenCmd

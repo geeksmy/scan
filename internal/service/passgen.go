@@ -9,7 +9,7 @@ import (
 	"scan/pkg/tools"
 	"scan/pkg/util"
 
-	"github.com/spf13/cobra"
+	"github.com/geeksmy/cobra"
 	"go.uber.org/zap"
 )
 
@@ -21,11 +21,12 @@ type PassGenSVC interface {
 	InitCmdArgs(cmd *cobra.Command) (*PassGenCmdArgs, error)
 	/**
 	 * GeneratePass 生成密码
-	 *
+	 * @param passwordCh 密码管道
 	 */
 	GeneratePass(passwordCh chan string, mainWG *sync.WaitGroup)
 	/**
 	 * OutFile 生成密码文件
+	 * @param passwordCh 密码管道
 	 */
 	OutFile(passwordCh <-chan string)
 }

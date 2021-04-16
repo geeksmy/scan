@@ -3,13 +3,14 @@ package service
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"sync"
 
 	"scan/config"
 	"scan/pkg/tools"
 	"scan/pkg/tools/blasting"
 
-	"github.com/spf13/cobra"
+	"github.com/geeksmy/cobra"
 	"go.uber.org/zap"
 )
 
@@ -546,16 +547,18 @@ func (svc *Blasting) BlastingMainLogic(requestCh <-chan BlastingRequest, resultC
 }
 
 // 输出文件
-func outFile(res BlastingResult, file *os.File) {
-	_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-20s%-20s\n", res.IP, res.Port, res.Server, res.Username, res.Password))
+func outFile(res BlastingResult, file *os.File, id int) {
+	_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s%-10s%-15s%-10s%-15s\n", strconv.Itoa(id), res.IP, res.Port, res.Server, res.Username, res.Password))
 }
 
 // 输出屏幕
-func outCmd(res BlastingResult) {
-	fmt.Printf("%-20s%-10s%-20s%-20s%-20s\n", res.IP, res.Port, res.Server, res.Username, res.Password)
+func outCmd(res BlastingResult, id int) {
+	fmt.Printf("%-5s%-20s%-10s%-15s%-10s%-15s\n", strconv.Itoa(id), res.IP, res.Port, res.Server, res.Username, res.Password)
 }
 
 func (svc *Blasting) OutputPrinting(resultCh <-chan BlastingResult) {
+	var id int
+
 	_, err := os.Stat(svc.BlastingCmdArgs.OutFileName)
 	if err == nil {
 		// 如果文件存在
@@ -566,15 +569,17 @@ func (svc *Blasting) OutputPrinting(resultCh <-chan BlastingResult) {
 
 	switch svc.BlastingCmdArgs.OutPut {
 	case "file":
-		_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-20s%-20s\n", "ip", "port", "server", "user", "pass"))
+		_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s%-10s%-15s%-10s%-15s\n", "id", "ip", "port", "server", "user", "pass"))
 		for res := range resultCh {
-			outFile(res, file)
+			id += 1
+			outFile(res, file, id)
 		}
 
 	default:
-		fmt.Printf("%-20s%-10s%-20s%-20s%-20s\n", "ip", "port", "server", "user", "pass")
+		fmt.Printf("%-5s%-20s%-10s%-15s%-10s%-15s\n", "id", "ip", "port", "server", "user", "pass")
 		for res := range resultCh {
-			outCmd(res)
+			id += 1
+			outCmd(res, id)
 		}
 	}
 

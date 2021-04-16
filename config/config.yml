@@ -75,3 +75,6 @@ passgen:
   domain-name: ""
   domain: ""
   device: ""
+
+intranet-alive:
+  target:

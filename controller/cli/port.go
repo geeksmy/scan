@@ -7,7 +7,7 @@ import (
 
 	"scan/internal/service"
 
-	"github.com/spf13/cobra"
+	"github.com/geeksmy/cobra"
 	"go.uber.org/zap"
 )
 

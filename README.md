@@ -24,7 +24,7 @@
 - [x] mysql
 - [x] redis
 - [x] postgresql
-- [x] oracle
+- [ ] oracle
 - [x] http_basic
 - [ ] tomcat
 - [x] telnet
@@ -34,11 +34,11 @@
 
 ### 自动发现内网存活段
 
-待开始...
+- [x] 完成
 
 ### 字典生成
 
-待开始...
+- [x] 完成
 
 ### Netbios扫描
 

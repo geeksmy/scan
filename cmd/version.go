@@ -16,15 +16,15 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/geeksmy/cobra"
 	"github.com/lneoe/go-help-libs/version"
-	"github.com/spf13/cobra"
 )
 
 // versionCmd represents the version command
 func versionCmd() *cobra.Command {
 	versionCmd := &cobra.Command{
 		Use:   "version",
-		Short: "工具当前版本",
+		Short: "当前版本",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			version.PrintVersion()
 			return nil

@@ -16,10 +16,12 @@ limitations under the License.
 package cmd
 
 import (
+	"os"
+
 	"scan/config"
 	"scan/controller/cli"
 
-	"github.com/spf13/cobra"
+	"github.com/geeksmy/cobra"
 	"go.uber.org/zap"
 )
 
@@ -28,12 +30,14 @@ func webFingerprintCmd() *cobra.Command {
 	webFingerprintCmd := &cobra.Command{
 		Use:   "web",
 		Short: "web服务探测",
-		Long:  "web服务探测工具",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// tools.Banner()
+			if len(os.Args) == 2 {
+				_ = cmd.Help()
+				return nil
+			}
 			p := cli.NewWebFingerprint(cmd, zap.L())
 			if err := p.WebFingerprintMain(); err != nil {
-				// _ = cmd.Help()
 				return err
 			}
 			return nil
@@ -45,9 +49,9 @@ func webFingerprintCmd() *cobra.Command {
 	}
 
 	webFingerprintCmd.PersistentFlags().StringP("target-urls", "u", "", "目标IP列表文件")
-	webFingerprintCmd.PersistentFlags().Int("thread", 0, "线程")
-	webFingerprintCmd.PersistentFlags().Int("timeout", 0, "超时")
-	webFingerprintCmd.PersistentFlags().Int("retry", 0, "重试次数")
+	webFingerprintCmd.PersistentFlags().IntP("thread", "t", 0, "线程,默认20")
+	webFingerprintCmd.PersistentFlags().IntP("timeout", "m", 0, "超时,默认1")
+	webFingerprintCmd.PersistentFlags().IntP("retry", "r", 0, "重试次数,默认1")
 	webFingerprintCmd.PersistentFlags().StringP("out-file", "o", "", "输出文件 web-fingerprint.txt")
 	webFingerprintCmd.PersistentFlags().StringArrayP("target-ports", "p", []string{}, "要扫描的Web服务端口列表 80,443")
 	webFingerprintCmd.PersistentFlags().StringP("fingerprint-file", "f", "", "Web指纹文件")

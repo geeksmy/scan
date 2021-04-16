@@ -11,35 +11,34 @@ import (
 	"go.uber.org/zap"
 )
 
-type PassGen struct {
+type IntranetAlive struct {
 	cmd    *cobra.Command
 	logger *zap.Logger
 }
 
-func NewPassGen(cmd *cobra.Command, logger *zap.Logger) *PassGen {
-	return &PassGen{
+func NewIntranetAlive(cmd *cobra.Command, logger *zap.Logger) *IntranetAlive {
+	return &IntranetAlive{
 		cmd:    cmd,
 		logger: logger,
 	}
 }
 
-func (p *PassGen) PassGenMain() error {
+func (i *IntranetAlive) IntranetAliveMain() error {
 	start := time.Now()
 
-	svc := service.NewPassGen(p.logger)
-
-	_, err := svc.InitCmdArgs(p.cmd)
+	svc := service.NewIntranetAlive(i.logger)
+	args, err := svc.InitCmdArgs(i.cmd)
 	if err != nil {
 		return err
 	}
 
 	var mainWG sync.WaitGroup
-	passwordCh := make(chan string, 10000)
+	ipsCh := make(chan string, len(args.Targets)/2)
 
 	mainWG.Add(1)
-	go svc.GeneratePass(passwordCh, &mainWG)
+	go svc.ICMPSendPackage(ipsCh, &mainWG)
 
-	svc.OutFile(passwordCh)
+	svc.OutputPrinting(ipsCh)
 
 	mainWG.Wait()
 	elapsed := time.Since(start)

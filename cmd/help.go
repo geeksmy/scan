@@ -18,15 +18,15 @@ package cmd
 import (
 	"strings"
 
+	"github.com/geeksmy/cobra"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 )
 
 // helpCmd represents the help command
 func helpCmd() *cobra.Command {
 	helpCommand := &cobra.Command{
 		Use:               "help [command]",
-		Short:             "模块使用帮助",
+		Short:             "使用帮助",
 		PersistentPreRun:  func(cmd *cobra.Command, args []string) {},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {},
 		RunE: func(c *cobra.Command, args []string) error {

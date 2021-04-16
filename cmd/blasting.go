@@ -16,10 +16,12 @@ limitations under the License.
 package cmd
 
 import (
+	"os"
+
 	"scan/config"
 	"scan/controller/cli"
 
-	"github.com/spf13/cobra"
+	"github.com/geeksmy/cobra"
 	"go.uber.org/zap"
 )
 
@@ -28,12 +30,14 @@ func blastingCmd() *cobra.Command {
 	blastingCmd := &cobra.Command{
 		Use:   "brute",
 		Short: "口令喷射",
-		Long:  "口令喷射工具",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// tools.Banner()
+			if len(os.Args) == 2 {
+				_ = cmd.Help()
+				return nil
+			}
 			p := cli.NewBlasting(cmd, zap.L())
 			if err := p.BlastingMain(); err != nil {
-				// _ = cmd.Help()
 				return err
 			}
 			return nil
@@ -46,17 +50,17 @@ func blastingCmd() *cobra.Command {
 
 	blastingCmd.PersistentFlags().StringP("target-host", "i", "", "目标文件")
 	blastingCmd.PersistentFlags().StringP("user-file", "u", "", "用户名字典")
-	blastingCmd.PersistentFlags().StringP("pass-file", "p", "", "密码字典")
-	blastingCmd.PersistentFlags().String("port", "", "服务端口(如目标用的非默认端口,则需自行手工指定)")
-	blastingCmd.PersistentFlags().Int("delay", 0, "延迟")
-	blastingCmd.PersistentFlags().Int("thread", 0, "线程")
-	blastingCmd.PersistentFlags().Int("timeout", 0, "超时")
-	blastingCmd.PersistentFlags().Int("retry", 0, "重试次数")
-	blastingCmd.PersistentFlags().Bool("scan-port", false, "爆破前是否进行端口扫描")
+	blastingCmd.PersistentFlags().StringP("pass-file", "l", "", "密码字典")
+	blastingCmd.PersistentFlags().StringP("port", "p", "", "服务端口(如非默认,请自行手工指定)")
+	blastingCmd.PersistentFlags().IntP("delay", "d", 0, "延迟,默认1")
+	blastingCmd.PersistentFlags().IntP("thread", "t", 0, "线程,默认20")
+	blastingCmd.PersistentFlags().IntP("timeout", "m", 0, "超时,默认1")
+	blastingCmd.PersistentFlags().IntP("retry", "r", 0, "重试次数,默认1")
+	blastingCmd.PersistentFlags().BoolP("scan-port", "n", false, "爆破前是否进行端口扫描")
 	blastingCmd.PersistentFlags().StringArrayP("services", "s", []string{},
-		`指定要爆破的服务 "ssh","ftp","mssql","mysql","redis","postgresql","http_basic","tomcat","telnet"`)
-	blastingCmd.PersistentFlags().String("path", "", `http_basic 路径 "/login"`)
-	blastingCmd.PersistentFlags().String("tomcat-path", "", `tomcat路径 "/manager"`)
+		`指定要爆破的服务 "ssh,ftp,mssql,mysql,redis,postgresql,http_basic,tomcat,telnet"`)
+	blastingCmd.PersistentFlags().StringP("path", "b", "", `http_basic 路径 "/login"`)
+	blastingCmd.PersistentFlags().StringP("tomcat-path", "a", "", `tomcat路径 "/manager"`)
 	blastingCmd.PersistentFlags().StringP("out-file", "o", "", "输出文件,blasting.txt")
 
 	return blastingCmd

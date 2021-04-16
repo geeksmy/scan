@@ -18,8 +18,8 @@ package cmd
 import (
 	"scan/config"
 
+	"github.com/geeksmy/cobra"
 	"github.com/geeksmy/go-libs/redis"
-	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
 
