@@ -41,7 +41,6 @@ type IntranetAliveCmdArgs struct {
 	Thread      int
 	Retry       int
 	Delay       int
-	OutPut      string
 	OutFileName string
 }
 
@@ -103,9 +102,8 @@ func (svc *IntranetAlive) InitCmdArgs(cmd *cobra.Command) (*IntranetAliveCmdArgs
 	outFile, _ := cmd.Flags().GetString("out-file")
 	switch outFile {
 	case "":
-		svc.Args.OutPut = "print"
+		svc.Args.OutFileName = conf.IntranetAlive.OutFile
 	default:
-		svc.Args.OutPut = "file"
 		svc.Args.OutFileName = outFile
 	}
 
@@ -190,39 +188,44 @@ func ipsChRemoveSliceMap(ip string, ipsMap *sync.Map) {
 
 func (svc *IntranetAlive) OutputPrinting(ipsCh <-chan string) {
 	var (
-		ipsMap sync.Map
-		id     int
+		ipsMap    sync.Map
+		id, oldId int
 	)
 
 	fmt.Printf("%-5s%-20s\n", "ID", "IP")
 
+	// 生成日志文件
+	_, err := os.Stat(fmt.Sprintf("%s-%s", "old", svc.Args.OutFileName))
+	if err == nil {
+		// 如果文件存在
+		_ = os.Remove(fmt.Sprintf("%s-%s", "old", svc.Args.OutFileName))
+	}
+
+	oldFile, _ := os.Create(fmt.Sprintf("%s-%s", "old", svc.Args.OutFileName))
+	_, _ = oldFile.WriteString(fmt.Sprintf("%-5s,%-20s\n", "ID", "IP"))
+
 	// 去重
 	for ip := range ipsCh {
+		oldId += 1
+		_, _ = oldFile.WriteString(fmt.Sprintf("%-5s%-20s", strconv.Itoa(oldId), ip))
 		go ipsChRemoveSliceMap(ip, &ipsMap)
 	}
 
-	_, err := os.Stat(svc.Args.OutFileName)
+	_ = os.Remove(fmt.Sprintf("%s-%s", "old", svc.Args.OutFileName))
+
+	_, err = os.Stat(svc.Args.OutFileName)
 	if err == nil {
 		// 如果文件存在
 		_ = os.Remove(svc.Args.OutFileName)
 	}
 
 	file, _ := os.Create(svc.Args.OutFileName)
+	_, _ = file.WriteString(fmt.Sprintf("%-5s,%-20s\n", "ID", "IP"))
+	ipsMap.Range(func(key, value interface{}) bool {
+		id += 1
+		fmt.Printf("%-5s%-20s\n", strconv.Itoa(id), key)
+		_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s", strconv.Itoa(id), key))
+		return true
+	})
 
-	switch svc.Args.OutPut {
-	case "file":
-		_, _ = file.WriteString(fmt.Sprintf("%-5s,%-20s\n", "ID", "IP"))
-		ipsMap.Range(func(key, value interface{}) bool {
-			id += 1
-			fmt.Printf("%-5s%-20s\n", strconv.Itoa(id), key)
-			_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s", strconv.Itoa(id), key))
-			return true
-		})
-	default:
-		ipsMap.Range(func(key, value interface{}) bool {
-			id += 1
-			fmt.Printf("%-5s%-20s\n", strconv.Itoa(id), key)
-			return true
-		})
-	}
 }

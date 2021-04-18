@@ -86,7 +86,6 @@ type PortCmdArgs struct {
 	Timeout         int
 	Thread          int
 	Retry           int
-	OutPut          string
 	OutFileName     string
 }
 
@@ -207,9 +206,8 @@ func (svc *Port) InitArgs(cmd *cobra.Command) (*PortCmdArgs, error) {
 	outFile, _ := cmd.Flags().GetString("out-file")
 	switch outFile {
 	case "":
-		svc.CmdArgs.OutPut = "print"
+		svc.CmdArgs.OutFileName = conf.Port.OutFile
 	default:
-		svc.CmdArgs.OutPut = "file"
 		svc.CmdArgs.OutFileName = outFile
 	}
 
@@ -606,18 +604,32 @@ func chanRemoveSliceMap(res Result, hashMap *sync.Map) {
 
 func (svc *Port) OutputPrinting(resultCh <-chan Result) {
 	var (
-		hashMap sync.Map
-		id      int
+		hashMap   sync.Map
+		id, oldID int
 	)
 
 	fmt.Printf("%-5s%-20s%-10s%-20s%-50.45s%-5s\n", "ID", "IP", "Port", "Server", "Server Info", "retry")
 
+	// 生成日志文件
+	_, err := os.Stat(fmt.Sprintf("%s-%s", "old", svc.CmdArgs.OutFileName))
+	if err == nil {
+		// 如果文件存在
+		_ = os.Remove(fmt.Sprintf("%s-%s", "old", svc.CmdArgs.OutFileName))
+	}
+
+	oldFile, _ := os.Create(fmt.Sprintf("%s-%s", "old", svc.CmdArgs.OutFileName))
+	_, _ = oldFile.WriteString(fmt.Sprintf("%-5s%-20s%-10s%-20s%-50.45s%-100.95s\n", "ID", "IP", "Port", "Server", "Server Info", "Banner"))
 	// 去重
 	for res := range resultCh {
+		oldID += 1
+		_, _ = oldFile.WriteString(fmt.Sprintf("%-5s%-20s%-10s%-20s%-50.45s%-100.95s\n", strconv.Itoa(oldID), res.IP, res.Port, res.ServerType, res.Version, res.Banner))
 		chanRemoveSliceMap(res, &hashMap)
 	}
 
-	_, err := os.Stat(svc.CmdArgs.OutFileName)
+	// 删除日志文件
+	_ = os.Remove(fmt.Sprintf("%s-%s", "old", svc.CmdArgs.OutFileName))
+
+	_, err = os.Stat(svc.CmdArgs.OutFileName)
 	if err == nil {
 		// 如果文件存在
 		_ = os.Remove(svc.CmdArgs.OutFileName)
@@ -625,23 +637,13 @@ func (svc *Port) OutputPrinting(resultCh <-chan Result) {
 
 	file, _ := os.Create(svc.CmdArgs.OutFileName)
 
-	switch svc.CmdArgs.OutPut {
-	case "file":
-		_, _ = file.WriteString(fmt.Sprintf("%-20s%-10s%-20s%-50.45s%-100.95s\n", "IP", "Port", "Server", "Server Info", "Banner"))
-		hashMap.Range(func(key, value interface{}) bool {
-			id += 1
-			fmt.Printf("%-5s%-20s%-10s%-20s%-50.45s%-1d\n", strconv.Itoa(id), value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version, value.(Result).Retry)
-			_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s%-10s%-20s%-50.45s\n", strconv.Itoa(id), value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version))
-			return true
-		})
-
-	default:
-		hashMap.Range(func(key, value interface{}) bool {
-			id += 1
-			fmt.Printf("%-5s%-20s%-10s%-20s%-50.45s%-1d\n", strconv.Itoa(id), value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version, value.(Result).Retry)
-			return true
-		})
-	}
+	_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s%-10s%-20s%-50.45s%-100.95s\n", "ID", "IP", "Port", "Server", "Server Info", "Banner"))
+	hashMap.Range(func(key, value interface{}) bool {
+		id += 1
+		fmt.Printf("%-5s%-20s%-10s%-20s%-50.45s%-1d\n", strconv.Itoa(id), value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version, value.(Result).Retry)
+		_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s%-10s%-20s%-50.45s\n", strconv.Itoa(id), value.(Result).IP, value.(Result).Port, value.(Result).ServerType, value.(Result).Version))
+		return true
+	})
 
 	_ = file.Close()
 }

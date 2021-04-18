@@ -82,7 +82,6 @@ type WebFingerPrintCmdArgs struct {
 	Thread      int
 	Timeout     int
 	Retry       int
-	OutPut      string
 	OutFileName string
 }
 
@@ -189,9 +188,8 @@ func (svc *WebFingerPrint) InitCmdArgs(cmd *cobra.Command) (*WebFingerPrintCmdAr
 	outFile, _ := cmd.Flags().GetString("out-file")
 	switch outFile {
 	case "":
-		svc.Args.OutPut = "print"
+		svc.Args.OutFileName = conf.WebFingerprint.OutFile
 	default:
-		svc.Args.OutPut = "file"
 		svc.Args.OutFileName = outFile
 	}
 
@@ -440,21 +438,12 @@ func (svc *WebFingerPrint) OutputPrinting(results chan model.Web) {
 	}
 
 	file, _ := os.Create(svc.Args.OutFileName)
-
-	switch svc.Args.OutPut {
-	case "file":
-		_, _ = file.WriteString(fmt.Sprintf("%-5s%-30s%-30.25s%-15s%-20s%-50s\n", "id", "url", "server", "state_code", "fingerprint", "title"))
-		fmt.Printf("%-5s%-30s%-30.25s%-15s%-20s%-50s\n", "id", "url", "server", "state_code", "fingerprint", "title")
-		for result := range results {
-			id += 1
-			fmt.Printf("%-5s%-30s%-30.25s%-3d%-12s%-20s%-50s\n", strconv.Itoa(id), result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title)
-			_, _ = file.WriteString(fmt.Sprintf("%-5s%-30s%-30.25s%-3d%-12s%-20s%-50.45s\n", strconv.Itoa(id), result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title))
-		}
-	default:
-		fmt.Printf("%-5s%-30s%-30.25s%-15s%-20s%-50s\n", "id", "url", "server", "state_code", "fingerprint", "title")
-		for result := range results {
-			id += 1
-			fmt.Printf("%-5s%-30s%-30.25s%-3d%-12s%-20s%-50s\n", strconv.Itoa(id), result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title)
-		}
+	_, _ = file.WriteString(fmt.Sprintf("%-5s%-30s%-30.25s%-15s%-20s%-50s\n", "id", "url", "server", "state_code", "fingerprint", "title"))
+	fmt.Printf("%-5s%-30s%-30.25s%-15s%-20s%-50s\n", "id", "url", "server", "state_code", "fingerprint", "title")
+	for result := range results {
+		id += 1
+		fmt.Printf("%-5s%-30s%-30.25s%-3d%-12s%-20s%-50s\n", strconv.Itoa(id), result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title)
+		_, _ = file.WriteString(fmt.Sprintf("%-5s%-30s%-30.25s%-3d%-12s%-20s%-50.45s\n", strconv.Itoa(id), result.Url, result.Server, result.StateCode, "", result.FingerPrint, result.Title))
 	}
+
 }

@@ -75,7 +75,6 @@ type BlastingCmdArgs struct {
 	Port        string
 	Path        string
 	TomcatPath  string
-	OutPut      string
 	OutFileName string
 }
 
@@ -239,9 +238,8 @@ func (svc *Blasting) InitArgs(cmd *cobra.Command) (*BlastingCmdArgs, error) {
 	outFile, _ := cmd.Flags().GetString("out-file")
 	switch outFile {
 	case "":
-		svc.BlastingCmdArgs.OutPut = "print"
+		svc.BlastingCmdArgs.OutFileName = conf.Blasting.OutFile
 	default:
-		svc.BlastingCmdArgs.OutPut = "file"
 		svc.BlastingCmdArgs.OutFileName = outFile
 	}
 
@@ -566,21 +564,13 @@ func (svc *Blasting) OutputPrinting(resultCh <-chan BlastingResult) {
 	}
 
 	file, _ := os.Create(svc.BlastingCmdArgs.OutFileName)
+	_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s%-10s%-15s%-10s%-15s\n", "id", "ip", "port", "server", "user", "pass"))
+	fmt.Printf("%-5s%-20s%-10s%-15s%-10s%-15s\n", "id", "ip", "port", "server", "user", "pass")
 
-	switch svc.BlastingCmdArgs.OutPut {
-	case "file":
-		_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s%-10s%-15s%-10s%-15s\n", "id", "ip", "port", "server", "user", "pass"))
-		for res := range resultCh {
-			id += 1
-			outFile(res, file, id)
-		}
-
-	default:
-		fmt.Printf("%-5s%-20s%-10s%-15s%-10s%-15s\n", "id", "ip", "port", "server", "user", "pass")
-		for res := range resultCh {
-			id += 1
-			outCmd(res, id)
-		}
+	for res := range resultCh {
+		id += 1
+		outFile(res, file, id)
+		outCmd(res, id)
 	}
 
 	_ = file.Close()

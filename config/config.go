@@ -49,6 +49,7 @@ type PortConfig struct {
 	Timeout         int      `yaml:"timeout,omitempty" default:"1"`
 	Thread          int      `yaml:"thread,omitempty" default:"20"`
 	Retry           int      `yaml:"retry,omitempty" default:"1"`
+	OutFile         string   `yaml:"out-file,omitempty" default:"port.txt"`
 }
 
 type BlastingConfig struct {
@@ -63,6 +64,7 @@ type BlastingConfig struct {
 	Services   []string `yaml:"services,omitempty"`
 	Path       string   `yaml:"path,omitempty" default:"/login"`
 	TomcatPath string   `yaml:"tomcat-path,omitempty" default:"/manager"`
+	OutFile    string   `yaml:"out-file,omitempty" default:"brute.txt"`
 }
 
 type WebFingerprintConfig struct {
@@ -72,6 +74,7 @@ type WebFingerprintConfig struct {
 	Thread          int      `yaml:"thread,omitempty" default:"20"`
 	Timeout         int      `yaml:"timeout,omitempty" default:"1"`
 	Retry           int      `yaml:"retry,omitempty" default:"1"`
+	OutFile         string   `yaml:"out-file,omitempty" default:"web.txt"`
 }
 
 type Fofa struct {
@@ -108,6 +111,7 @@ type IntranetAliveConfig struct {
 	Timeout int     `yaml:"timeout,omitempty" default:"1"`
 	Retry   int     `yaml:"retry,omitempty" default:"1"`
 	Delay   float32 `yaml:"delay,omitempty"`
+	OutFile string  `yaml:"out-file,omitempty" default:"survive.txt"`
 }
 
 func InitLogger(debug, disableStacktrace bool, level, output string) {
