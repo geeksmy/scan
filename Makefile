@@ -25,8 +25,6 @@ EXTRA_BUILD_ARGS=
 .PONY: lint test
 default: lint test build
 
-all: clean setup build-windows build-linux build-mac
-
 lint:
 	@echo "+ $@"
 	@$(if $(GOLINT), , \
@@ -45,16 +43,6 @@ setup:
 	mkdir -p bin/linux
 	mkdir -p bin/osx
 	mkdir -p bin/windows
-
-build-windows: setup
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=windows go build $(BUILD_ARGS) $(EXTRA_BUILD_ARGS) -o bin/windows/${PACKAGE}.exe $(CMD_PACKAGE)
-
-build-linux: setup
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=linux go build $(BUILD_ARGS) $(EXTRA_BUILD_ARGS) -o bin/linux/${PACKAGE} $(CMD_PACKAGE)
-
-build-mac: setup
-	CGO_ENABLED=0 GOARCH=amd64 GOOS=darwin go build $(BUILD_ARGS) $(EXTRA_BUILD_ARGS) -o bin/osx/${PACKAGE} $(CMD_PACKAGE)
-
 
 clean:
 	@echo "+ $@"

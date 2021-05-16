@@ -155,8 +155,16 @@ func (svc *Port) InitArgs(cmd *cobra.Command) (*PortCmdArgs, error) {
 		}
 		svc.CmdArgs.TargetPorts = ports
 	case 0:
+		var (
+			ports *[]string
+			err   error
+		)
 		// 如果不传命令行参数使用配置文件的配置
-		ports, err := tools.UnfoldPort(conf.Port.TargetPorts)
+		if len(conf.Port.TargetPorts) == 1 {
+			ports, err = tools.UnfoldPort(tools.String2strings(conf.Port.TargetPorts[0]))
+		} else {
+			ports, err = tools.UnfoldPort(conf.Port.TargetPorts)
+		}
 		if err != nil {
 			fmt.Println("[-] 参数错误")
 			return nil, err

@@ -8,7 +8,6 @@ require (
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/geeksmy/cobra v1.1.4
 	github.com/geeksmy/go-libs v0.0.0-20210119081920-06d5b69154f4
-	github.com/gijsbers/go-pcre v0.0.0-20161214203829-a84f3096ab3c
 	github.com/go-redis/redis/v7 v7.4.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.4.3 // indirect
@@ -20,7 +19,6 @@ require (
 	github.com/lib/pq v1.8.0
 	github.com/lneoe/go-help-libs v0.0.0-20190725022220-308d4d4b26d0
 	github.com/magiconair/properties v1.8.4 // indirect
-	// github.com/mattn/go-oci8 v0.1.1
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pelletier/go-toml v1.8.1 // indirect

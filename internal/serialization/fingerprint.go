@@ -7,8 +7,8 @@ import (
 
 	"scan/internal/model"
 	"scan/pkg/tools"
-
-	"github.com/gijsbers/go-pcre"
+	"scan/pkg/tools/pcre"
+	// "github.com/geeksmy/go-pcre"
 )
 
 func Array2Probes(array []string) (*[]model.Probe, error) {

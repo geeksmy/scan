@@ -202,12 +202,12 @@ func (svc *IntranetAlive) OutputPrinting(ipsCh <-chan string) {
 	}
 
 	oldFile, _ := os.Create(fmt.Sprintf("%s-%s", "old", svc.Args.OutFileName))
-	_, _ = oldFile.WriteString(fmt.Sprintf("%-5s,%-20s\n", "ID", "IP"))
+	_, _ = oldFile.WriteString(fmt.Sprintf("%-5s%-20s\n", "ID", "IP"))
 
 	// 去重
 	for ip := range ipsCh {
 		oldId += 1
-		_, _ = oldFile.WriteString(fmt.Sprintf("%-5s%-20s", strconv.Itoa(oldId), ip))
+		_, _ = oldFile.WriteString(fmt.Sprintf("%-5s%-20s\n", strconv.Itoa(oldId), ip))
 		go ipsChRemoveSliceMap(ip, &ipsMap)
 	}
 
@@ -220,11 +220,11 @@ func (svc *IntranetAlive) OutputPrinting(ipsCh <-chan string) {
 	}
 
 	file, _ := os.Create(svc.Args.OutFileName)
-	_, _ = file.WriteString(fmt.Sprintf("%-5s,%-20s\n", "ID", "IP"))
+	_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s\n", "ID", "IP"))
 	ipsMap.Range(func(key, value interface{}) bool {
 		id += 1
 		fmt.Printf("%-5s%-20s\n", strconv.Itoa(id), key)
-		_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s", strconv.Itoa(id), key))
+		_, _ = file.WriteString(fmt.Sprintf("%-5s%-20s\n", strconv.Itoa(id), key))
 		return true
 	})
 

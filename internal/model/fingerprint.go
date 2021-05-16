@@ -1,7 +1,8 @@
 package model
 
 import (
-	"github.com/gijsbers/go-pcre"
+	// "github.com/geeksmy/go-pcre"
+	"scan/pkg/tools/pcre"
 )
 
 type Match struct {

@@ -90,8 +90,6 @@ github.com/geeksmy/go-libs v0.0.0-20210119081920-06d5b69154f4 h1:3KvYNRsKB+j4ega
 github.com/geeksmy/go-libs v0.0.0-20210119081920-06d5b69154f4/go.mod h1:pPAPr0u4j10OAVrRet0hZ3M6LoUec/d4BVBgSi9oJ6o=
 github.com/getkin/kin-openapi v0.18.0/go.mod h1:WGRs2ZMM1Q8LR1QBEwUxC6RJEfaBcD0s+pcEVXFuAjw=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
-github.com/gijsbers/go-pcre v0.0.0-20161214203829-a84f3096ab3c h1:o5z/Stj4aWUiDiCVFdEOgXcwNF+Z7mQSlvDTaWBK98Q=
-github.com/gijsbers/go-pcre v0.0.0-20161214203829-a84f3096ab3c/go.mod h1:Bd83Kcti1U5OMXYYTjilhd6os+l6AmlTMVbDtaBvycQ=
 github.com/globalsign/mgo v0.0.0-20180905125535-1ca0a4f7cbcb/go.mod h1:xkRDCp4j0OGD1HRkm4kmhM+pmpv3AKq5SU7GMg4oO/Q=
 github.com/go-gl/glfw v0.0.0-20190409004039-e6da0acd62b1/go.mod h1:vR7hzQXu2zJy9AVAgeJqvqgH9Q5CA+iKCZ2gyEVpxRU=
 github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
