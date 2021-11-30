@@ -39,6 +39,14 @@ build:
 	@echo "+ build"
 	go build $(BUILD_ARGS) $(EXTRA_BUILD_ARGS) -o ${OUTPUT_FILE} $(CMD_PACKAGE)
 
+build-linux:
+#	@echo "+ build linux 386"
+#	cp pkg/tools/pcre/lib/linux/libpcre_i386.a pkg/tools/pcre/lib/linux/libpcre.a
+#	CGO_ENABLED=1 GOOS=linux GOARCH=386 CC=i686-unknown-linux-gnu-gcc CXX=i686-unknown-linux-gnu-g++ go build $(BUILD_ARGS) -o $(OUTPUT_DIR)/linux/$(PACKAGE)_386 $(CMD_PACKAGE)
+	@echo "+ build linux x86_64"
+	cp pkg/tools/pcre/lib/linux/libpcre_x64.a pkg/tools/pcre/lib/linux/libpcre.a
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 CC=x86_64-unknown-linux-gnu-gcc CXX=x86_64-unknown-linux-gnu-g++ go build $(BUILD_ARGS) -o bin/linux $(CMD_PACKAGE)
+
 setup:
 	mkdir -p bin/linux
 	mkdir -p bin/osx
